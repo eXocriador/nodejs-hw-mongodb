@@ -7,10 +7,23 @@ import {
 } from '../services/contacts.js';
 import { sendResponse } from '../utils/sendResponse.js';
 import createHttpError from 'http-errors';
+import { parsePaginationParams } from '../utils/filters/parsePaginationParams.js';
+import { parseSortParams } from '../utils/filters/parseSortParams.js';
+import { parseFilterParams } from '../utils/filters/parseFilterParams.js';
 
-export const getContactsController = async (req, res, next) => {
-  const contacts = await getAllContacts();
-  if (!contacts || contacts.length === 0) {
+export const getContactsController = async (req, res) => {
+  const { page, perPage } = parsePaginationParams(req.query);
+  const { sortBy, sortOrder } = parseSortParams(req.query);
+  const filters = parseFilterParams(req.query);
+  const contacts = await getAllContacts({
+    page,
+    perPage,
+    sortBy,
+    sortOrder,
+    filters,
+  });
+
+  if (!contacts || contacts.data.length === 0) {
     throw createHttpError(404, 'Contacts not found!');
   }
 
@@ -20,7 +33,7 @@ export const getContactsController = async (req, res, next) => {
   });
 };
 
-export const getContactByIdController = async (req, res, next) => {
+export const getContactByIdController = async (req, res) => {
   const { contactId } = req.params;
   const contact = await getContactById(contactId);
 
@@ -34,7 +47,7 @@ export const getContactByIdController = async (req, res, next) => {
   });
 };
 
-export const createContactController = async (req, res, next) => {
+export const createContactController = async (req, res) => {
   const contact = await createContact(req.body);
 
   sendResponse(res, {
@@ -44,7 +57,7 @@ export const createContactController = async (req, res, next) => {
   });
 };
 
-export const deleteContactController = async (req, res, next) => {
+export const deleteContactController = async (req, res) => {
   const { contactId } = req.params;
   const contact = await deleteContact(contactId);
 
@@ -55,7 +68,7 @@ export const deleteContactController = async (req, res, next) => {
   res.status(204).send();
 };
 
-export const upsertContactController = async (req, res, next) => {
+export const upsertContactController = async (req, res) => {
   const { contactId } = req.params;
   const contactBefore = await getContactById(contactId);
   const contact = await updateContact(contactId, req.body, { upsert: true });
@@ -72,7 +85,7 @@ export const upsertContactController = async (req, res, next) => {
   });
 };
 
-export const patchContactController = async (req, res, next) => {
+export const patchContactController = async (req, res) => {
   const { contactId } = req.params;
   const updatedContact = await updateContact(contactId, req.body);
 
