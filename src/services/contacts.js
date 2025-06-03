@@ -1,7 +1,29 @@
 import { Contacts } from '../db/models/contact.js';
+import { calculatePaginationData } from '../utils/filters/calculatePaginationData.js';
+import { SORT_ORDER } from '../constants/contacts.js';
 
-export const getAllContacts = async () => {
-  return await Contacts.find();
+export const getAllContacts = async ({
+  page = 1,
+  perPage = 10,
+  sortOrder = SORT_ORDER.ASC,
+  sortBy = '_id',
+  filters = {},
+}) => {
+  const limit = perPage;
+  const skip = (page - 1) * perPage;
+  const contactsQuery = Contacts.find(filters);
+  const contactsCount = await Contacts.countDocuments(filters);
+  const contacts = await contactsQuery
+    .skip(skip)
+    .limit(limit)
+    .sort({ [sortBy]: sortOrder })
+    .exec();
+  const paginationData = calculatePaginationData(contactsCount, perPage, page);
+
+  return {
+    data: contacts,
+    ...paginationData,
+  };
 };
 
 export const getContactById = async (contactId) => {
@@ -20,8 +42,8 @@ export const updateContact = async (contactId, payload, options = {}) => {
   const { upsert = false } = options;
 
   const updatedContact = await Contacts.findByIdAndUpdate(contactId, payload, {
-    new: true,
     upsert,
+    new: true,
   });
 
   return updatedContact;
