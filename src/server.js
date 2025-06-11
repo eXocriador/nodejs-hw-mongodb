@@ -21,9 +21,11 @@ export const serverSetup = () => {
   app.use(express.json());
   app.use(cookieParser());
   app.use(logger);
+
   app.use('/', welcomeRoute);
   app.use('/auth', authRouter);
   app.use('/contacts', contactsRouter);
+
   app.use(notFoundHandler);
   app.use(errorHandler);
   app.listen(PORT, startLogs);

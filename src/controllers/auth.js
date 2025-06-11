@@ -28,16 +28,16 @@ export const loginUserController = async (req, res, next) => {
 
     res.cookie('refreshToken', session.refreshToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       expires: session.refreshTokenValidUntil,
       path: '/',
     });
 
     res.cookie('sessionId', session._id, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       expires: session.refreshTokenValidUntil,
       path: '/',
     });
@@ -63,14 +63,14 @@ export const logoutUserController = async (req, res, next) => {
 
     res.clearCookie('sessionId', {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       path: '/',
     });
     res.clearCookie('refreshToken', {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       path: '/',
     });
 
@@ -89,16 +89,16 @@ export const refreshUserSessionController = async (req, res, next) => {
 
     res.cookie('refreshToken', session.refreshToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       expires: session.refreshTokenValidUntil,
       path: '/',
     });
 
     res.cookie('sessionId', session._id, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       expires: session.refreshTokenValidUntil,
       path: '/',
     });
