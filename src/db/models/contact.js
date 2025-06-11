@@ -1,6 +1,6 @@
 // src/db/models/contact.js
 
-import { model, Schema } from 'mongoose';
+import { model, Schema, Types } from 'mongoose';
 import { typeList } from '../../constants/contacts.js';
 import { handeSaveError, setUpdateSettings } from './hooks.js';
 
@@ -27,6 +27,11 @@ const contactSchema = new Schema(
       enum: typeList,
       required: true,
       default: 'personal',
+    },
+    userId: {
+      type: Types.ObjectId,
+      ref: 'user',
+      required: true,
     },
   },
   {

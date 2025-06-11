@@ -11,7 +11,18 @@ import { parsePaginationParams } from '../utils/filters/parsePaginationParams.js
 import { parseSortParams } from '../utils/filters/parseSortParams.js';
 import { parseFilterParams } from '../utils/filters/parseFilterParams.js';
 
+const checkUserAuth = (req) => {
+  if (!req.user) {
+    throw createHttpError(
+      401,
+      'Authentication required. Please log in to access this resource.',
+    );
+  }
+};
+
 export const getContactsController = async (req, res) => {
+  checkUserAuth(req);
+
   const { page, perPage } = parsePaginationParams(req.query);
   const { sortBy, sortOrder } = parseSortParams(req.query);
   const filters = parseFilterParams(req.query);
@@ -21,10 +32,11 @@ export const getContactsController = async (req, res) => {
     sortBy,
     sortOrder,
     filters,
+    userId: req.user._id,
   });
 
   if (!contacts || contacts.data.length === 0) {
-    throw createHttpError(404, 'Contacts not found!');
+    throw createHttpError(404, 'No contacts found for the current user');
   }
 
   sendResponse(res, {
@@ -34,11 +46,16 @@ export const getContactsController = async (req, res) => {
 };
 
 export const getContactByIdController = async (req, res) => {
+  checkUserAuth(req);
+
   const { contactId } = req.params;
-  const contact = await getContactById(contactId);
+  const contact = await getContactById(contactId, req.user._id);
 
   if (!contact) {
-    throw createHttpError(404, `Contact with id ${contactId} not found!`);
+    throw createHttpError(
+      404,
+      `Contact with id ${contactId} not found for the current user`,
+    );
   }
 
   sendResponse(res, {
@@ -48,7 +65,9 @@ export const getContactByIdController = async (req, res) => {
 };
 
 export const createContactController = async (req, res) => {
-  const contact = await createContact(req.body);
+  checkUserAuth(req);
+
+  const contact = await createContact(req.body, req.user._id);
 
   sendResponse(res, {
     statusCode: 201,
@@ -58,20 +77,26 @@ export const createContactController = async (req, res) => {
 };
 
 export const deleteContactController = async (req, res) => {
+  checkUserAuth(req);
+
   const { contactId } = req.params;
-  const contact = await deleteContact(contactId);
+  const contact = await deleteContact(contactId, req.user._id);
 
   if (!contact) {
-    throw createHttpError(404, 'Contact not found');
+    throw createHttpError(404, 'Contact not found for the current user');
   }
 
   res.status(204).send();
 };
 
 export const upsertContactController = async (req, res) => {
+  checkUserAuth(req);
+
   const { contactId } = req.params;
-  const contactBefore = await getContactById(contactId);
-  const contact = await updateContact(contactId, req.body, { upsert: true });
+  const contactBefore = await getContactById(contactId, req.user._id);
+  const contact = await updateContact(contactId, req.body, req.user._id, {
+    upsert: true,
+  });
 
   const isNew = !contactBefore;
   const status = isNew ? 201 : 200;
@@ -86,11 +111,16 @@ export const upsertContactController = async (req, res) => {
 };
 
 export const patchContactController = async (req, res) => {
+  checkUserAuth(req);
+
   const { contactId } = req.params;
-  const updatedContact = await updateContact(contactId, req.body);
+  const updatedContact = await updateContact(contactId, req.body, req.user._id);
 
   if (!updatedContact) {
-    throw createHttpError(404, `Contact with id ${contactId} not found!`);
+    throw createHttpError(
+      404,
+      `Contact with id ${contactId} not found for the current user`,
+    );
   }
 
   sendResponse(res, {

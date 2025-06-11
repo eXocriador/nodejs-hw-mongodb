@@ -4,7 +4,7 @@ import { randomBytes } from 'crypto';
 
 import { UsersCollection } from '../db/models/user.js';
 import { SessionsCollection } from '../db/models/session.js';
-import { THIRTY_DAYS, ONE_DAY } from '../constants/index.js';
+import { THIRTY_DAYS, FIFTEEN_MINUTES } from '../constants/index.js';
 
 const generateToken = () => randomBytes(48).toString('hex');
 
@@ -47,7 +47,7 @@ export const loginUser = async ({ email, password }) => {
   const refreshToken = generateToken();
 
   const now = new Date();
-  const accessTokenValidUntil = new Date(now.getTime() + ONE_DAY);
+  const accessTokenValidUntil = new Date(now.getTime() + FIFTEEN_MINUTES);
   const refreshTokenValidUntil = new Date(now.getTime() + THIRTY_DAYS);
 
   let session = await SessionsCollection.findOne({ userId: user._id });
@@ -97,7 +97,7 @@ export const refreshUsersSession = async ({ sessionId, refreshToken }) => {
   const newRefreshToken = generateToken();
 
   const now = new Date();
-  const newAccessTokenValidUntil = new Date(now.getTime() + ONE_DAY);
+  const newAccessTokenValidUntil = new Date(now.getTime() + FIFTEEN_MINUTES);
   const newRefreshTokenValidUntil = new Date(now.getTime() + THIRTY_DAYS);
 
   session.accessToken = newAccessToken;
