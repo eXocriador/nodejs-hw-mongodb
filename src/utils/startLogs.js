@@ -18,21 +18,25 @@ const getLocalIP = () => {
 
 export const startLogs = () => {
   const port = getEnvVar('PORT', '3000');
-  const mode = getEnvVar('NODE_ENV', 'development');
+  const mode = getEnvVar('NODE_ENV', '{development}');
   const localIP = getLocalIP();
 
   const mongoStatus =
     mongoose.connection.readyState === 1
-      ? chalk.green('Connected')
+      ? chalk.greenBright('Connected')
       : chalk.red('Not connected');
 
   const message = `
 ${chalk.bold.greenBright('🚀 SERVER STARTED')}
-${chalk.cyan('🌐 Local:')}      http://${chalk.underline(`localhost:${port}`)}
-${chalk.cyan('📡 Network:')}    http://${chalk.underline(`${localIP}:${port}`)}
-${chalk.cyan('🔧 Mode:')}       ${chalk.yellowBright(mode)}
-${chalk.cyan('📟 MongoDB:')}    ${mongoStatus}
-${chalk.cyan('🕒 Started at:')} ${chalk.magentaBright(
+${chalk.green('🌐 Local:')}      ${chalk.blue.underline(
+    `http://localhost:${port}`,
+  )}
+${chalk.green('📡 Network:')}    ${chalk.blue.underline(
+    `http://${localIP}:${port}`,
+  )}
+${chalk.green('🔧 Mode:')}       ${chalk.yellowBright(mode)}
+${chalk.green('📟 MongoDB:')}    ${mongoStatus}
+${chalk.green('🕒 Started at:')} ${chalk.greenBright(
     new Date().toLocaleString(),
   )}
 `;
@@ -43,7 +47,7 @@ ${chalk.cyan('🕒 Started at:')} ${chalk.magentaBright(
       margin: 1,
       borderColor: 'cyan',
       borderStyle: 'round',
-      title: '💻 App Info',
+      title: "💻 eXocriador's server",
       titleAlignment: 'center',
     }),
   );
