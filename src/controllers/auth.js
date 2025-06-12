@@ -4,11 +4,9 @@ import {
   logoutUser,
   refreshUsersSession,
 } from '../services/auth.js';
-import { registerUserSchema, loginUserSchema } from '../validation/auth.js';
 
 export const registerUserController = async (req, res, next) => {
   try {
-    await registerUserSchema.validateAsync(req.body);
     const user = await registerUser(req.body);
 
     res.status(201).json({
@@ -23,7 +21,6 @@ export const registerUserController = async (req, res, next) => {
 
 export const loginUserController = async (req, res, next) => {
   try {
-    await loginUserSchema.validateAsync(req.body);
     const session = await loginUser(req.body);
 
     res.cookie('refreshToken', session.refreshToken, {
@@ -47,7 +44,6 @@ export const loginUserController = async (req, res, next) => {
       message: 'Login successful',
       data: {
         accessToken: session.accessToken,
-        user: session.user,
       },
     });
   } catch (error) {
