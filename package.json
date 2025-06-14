@@ -1,16 +1,17 @@
 {
   "name": "nodejs-hw-mongodb",
-  "type": "module",
+  "type": "commonjs",
   "version": "1.0.0",
   "description": "",
   "keywords": [],
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "lint": "eslint src/**/*.js",
+    "lint": "eslint src/**/*.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon src/index.js",
-    "start": "node src/index.js",
-    "start:prod": "NODE_ENV=production node src/index.js"
+    "dev": "nodemon",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "start:prod": "NODE_ENV=production node dist/index.js"
   },
   "repository": {
     "type": "git",
@@ -24,27 +25,47 @@
   "homepage": "https://github.com/eXocriador/nodejs-hw-mongodb#readme",
   "devDependencies": {
     "@eslint/js": "^9.26.0",
-    "@types/cors": "^2.8.18",
-    "@types/express": "^5.0.1",
+    "@types/bcryptjs": "^3.0.0",
+    "@types/compression": "^1.8.1",
+    "@types/cookie-parser": "^1.4.9",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/node": "^20.11.24",
+    "@typescript-eslint/eslint-plugin": "^7.1.0",
+    "@typescript-eslint/parser": "^7.1.0",
     "eslint": "^9.26.0",
     "globals": "^16.1.0",
     "nodemon": "^3.1.10",
-    "pino-pretty": "^13.0.0"
+    "pino-pretty": "^13.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
   },
   "dependencies": {
+    "@types/multer": "^1.4.13",
+    "@types/nodemailer": "^6.4.17",
     "bcryptjs": "^3.0.2",
-    "boxen": "^8.0.1",
-    "chalk": "^5.4.1",
+    "boxen": "^7.1.1",
+    "chalk": "^4.1.2",
+    "cloudinary": "^2.6.1",
+    "compression": "^1.8.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "express-rate-limit": "^7.5.0",
+    "handlebars": "^4.7.8",
+    "helmet": "^8.1.0",
     "http-errors": "^2.0.0",
     "joi": "^17.13.3",
-    "mongoose": "^8.14.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.15.1",
+    "multer": "^2.0.1",
+    "nodemailer": "^7.0.3",
     "pino-http": "^10.4.0"
   },
   "engines": {
     "node": ">=18.0.0"
-  }
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
