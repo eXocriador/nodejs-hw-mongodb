@@ -1,0 +1,55 @@
+post:
+  tags:
+    - Auth
+  summary: Реєстрація користувача
+  description: Створює нового користувача
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - name
+            - email
+            - password
+          properties:
+            name:
+              type: string
+              description: Ім'я користувача
+            email:
+              type: string
+              format: email
+              description: Email користувача
+            password:
+              type: string
+              format: password
+              description: Пароль користувача
+  responses:
+    '201':
+      description: Користувача створено
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: integer
+                example: 201
+              message:
+                type: string
+                example: "Successfully registered a user!"
+              data:
+                type: object
+    '409':
+      description: Email вже використовується
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+    '400':
+      description: Невалідні дані
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'

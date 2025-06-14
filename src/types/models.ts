@@ -13,6 +13,14 @@ export interface IUser extends Document {
   passwordResetExpires?: Date;
 }
 
+export interface ISession extends Document {
+  userId: IUser['_id'];
+  accessToken: string;
+  refreshToken: string;
+  accessTokenValidUntil: Date;
+  refreshTokenValidUntil: Date;
+}
+
 export interface IContact extends Document {
   name: string;
   email: string;
@@ -91,4 +99,11 @@ export interface ContactResponse {
   owner: IContact['owner'];
   photo?: string;
   contactType: ContactType;
+}
+
+export interface LoginWithGoogleOAuthRequest {
+  code: string;
+  state?: string;
+  error?: string;
+  error_description?: string;
 }

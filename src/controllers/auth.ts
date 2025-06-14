@@ -1,20 +1,24 @@
+import createHttpError from 'http-errors';
 import { Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
+import path from 'path';
+import fs from 'fs/promises';
+import handlebars from 'handlebars';
+
 import { IUser } from '../types/models.ts';
 import { CustomRequest } from '../types/index.ts';
 import { hashPassword, comparePassword } from '../services/auth.ts';
 import { authSchema, loginSchema, requestResetEmailSchema, resetPasswordSchema } from '../validation/auth.ts';
 import User from '../db/models/user.ts';
 import Session from '../db/models/session.ts';
-import { generateAuthTokens, createSession, deleteSession, findSessionByRefreshToken } from '../services/session.ts';
-import createHttpError from 'http-errors';
+import { generateAuthTokens, createSession, deleteSession, findSessionByRefreshToken, setupSession } from '../services/session.ts';
 import { ctrlWrapper } from '../utils/ctrlWrapper.ts';
-import jwt from 'jsonwebtoken';
 import { getEnvVar } from '../utils/getEnvVar.ts';
 import { sendEmail } from '../services/email.ts';
-import path from 'path';
-import fs from 'fs/promises';
-import handlebars from 'handlebars';
 import { TEMPLATES_DIR } from '../constants/index.ts';
+import { generateAuthUrl } from '../utils/googleOAuth2.ts';
+import { loginOrSignupWithGoogle } from '../services/auth.ts';
+
 
 const JWT_SECRET = getEnvVar('JWT_SECRET');
 
@@ -234,3 +238,28 @@ export const handleResetPassword = ctrlWrapper(async (
     data: {}
   });
 });
+
+export const getGoogleOAuthUrlController = async (req: Request, res: Response) => {
+  const url = generateAuthUrl();
+  res.json({
+    status: 200,
+    message: 'Successfully get Google OAuth url!',
+    data: {
+      url,
+    },
+  });
+};
+
+
+export const loginWithGoogleController = async (req: CustomRequest, res: Response) => {
+  const session = await loginOrSignupWithGoogle(req.body.code);
+  setupSession(res, session);
+
+  res.json({
+    status: 200,
+    message: 'Successfully logged in via Google OAuth!',
+    data: {
+      accessToken: session.accessToken,
+    },
+  });
+};

@@ -1,0 +1,16 @@
+post:
+  tags:
+    - Auth
+  summary: Вихід з системи
+  description: Видаляє сесію користувача
+  security:
+    - bearerAuth: []
+  responses:
+    '204':
+      description: Успішний вихід
+    '401':
+      description: Не авторизований
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'

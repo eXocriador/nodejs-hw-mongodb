@@ -1,0 +1,52 @@
+get:
+  tags:
+    - Auth
+  summary: Отримати URL для Google OAuth
+  description: Повертає URL для авторизації через Google OAuth
+  operationId: getGoogleAuthUrl
+  responses:
+    '200':
+      description: URL для Google OAuth
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              url:
+                type: string
+                description: URL для авторизації через Google
+post:
+  tags:
+    - Auth
+  summary: Google OAuth авторизація
+  description: Авторизує користувача через Google OAuth
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - token
+          properties:
+            token:
+              type: string
+              description: Google OAuth токен
+  responses:
+    '200':
+      description: Успішна авторизація
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/AuthResponse.yaml'
+      headers:
+        Set-Cookie:
+          schema:
+            type: string
+            description: Cookie з refresh токеном
+    '401':
+      description: Помилка авторизації
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
