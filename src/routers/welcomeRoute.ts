@@ -5,7 +5,8 @@ const router = Router();
 
 router.get('/', (req: Request, res: Response) => {
   res.json({
-    message: 'Welcome to the API!',
+    message: 'Welcome to the Contacts-app API!',
+    docs: '/api-docs',
     routes: [
       '/',
       '/contacts',
