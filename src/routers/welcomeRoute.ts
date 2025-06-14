@@ -8,8 +8,8 @@ router.get('/', (req: Request, res: Response) => {
     message: 'Welcome to the API!',
     routes: [
       '/',
-      '/api/contacts',
-      '/api/auth',
+      '/contacts',
+      '/auth',
       '/health',
     ],
   });
