@@ -1,0 +1,41 @@
+type: object
+required:
+  - name
+  - email
+  - password
+properties:
+  _id:
+    type: string
+    description: Унікальний ідентифікатор користувача
+  name:
+    type: string
+    description: Ім'я користувача
+  email:
+    type: string
+    format: email
+    description: Email користувача
+  password:
+    type: string
+    description: Хеш паролю
+  subscription:
+    type: string
+    enum: [starter, pro, business]
+    default: starter
+    description: Тип підписки
+  avatarURL:
+    type: string
+    description: URL аватара
+  verify:
+    type: boolean
+    default: false
+    description: Чи верифікований email
+  verificationToken:
+    type: string
+    description: Токен для верифікації email
+  passwordResetToken:
+    type: string
+    description: Токен для скидання паролю
+  passwordResetExpires:
+    type: string
+    format: date-time
+    description: Термін дії токену скидання паролю

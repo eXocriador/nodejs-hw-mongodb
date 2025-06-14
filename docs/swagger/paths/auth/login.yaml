@@ -1,0 +1,47 @@
+post:
+  tags:
+    - Auth
+  summary: Вхід в систему
+  description: Авторизує користувача та повертає токени
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - email
+            - password
+          properties:
+            email:
+              type: string
+              format: email
+              description: Email користувача
+            password:
+              type: string
+              format: password
+              description: Пароль користувача
+  responses:
+    '200':
+      description: Успішний вхід
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/AuthResponse.yaml'
+      headers:
+        Set-Cookie:
+          schema:
+            type: string
+            description: Cookie з refresh токеном
+    '401':
+      description: Неправильний email або пароль
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+    '400':
+      description: Невалідні дані
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'

@@ -1,0 +1,35 @@
+type: object
+required:
+  - name
+  - email
+  - phone
+  - owner
+properties:
+  _id:
+    type: string
+    description: Унікальний ідентифікатор контакту
+  name:
+    type: string
+    description: Ім'я контакту
+  email:
+    type: string
+    format: email
+    description: Email контакту
+  phone:
+    type: string
+    description: Номер телефону контакту
+  favorite:
+    type: boolean
+    default: false
+    description: Чи є контакт улюбленим
+  owner:
+    type: string
+    description: ID власника контакту
+  createdAt:
+    type: string
+    format: date-time
+    description: Дата створення контакту
+  updatedAt:
+    type: string
+    format: date-time
+    description: Дата останнього оновлення контакту

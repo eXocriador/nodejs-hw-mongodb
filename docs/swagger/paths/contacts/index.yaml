@@ -1,0 +1,113 @@
+get:
+  tags:
+    - Contacts
+  summary: Отримати список контактів
+  description: Повертає список контактів користувача з можливістю пагінації та фільтрації
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: query
+      name: page
+      schema:
+        type: integer
+        default: 1
+      description: Номер сторінки
+    - in: query
+      name: limit
+      schema:
+        type: integer
+        default: 10
+      description: Кількість контактів на сторінці
+    - in: query
+      name: favorite
+      schema:
+        type: boolean
+      description: Фільтр за улюбленими контактами
+  responses:
+    '200':
+      description: Список контактів
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: integer
+                example: 200
+              message:
+                type: string
+                example: "Successfully retrieved contacts!"
+              data:
+                type: object
+                properties:
+                  contacts:
+                    type: array
+                    items:
+                      $ref: '../../components/schemas/Contact.yaml'
+                  total:
+                    type: integer
+                    description: Загальна кількість контактів
+                  page:
+                    type: integer
+                    description: Поточна сторінка
+                  limit:
+                    type: integer
+                    description: Кількість контактів на сторінці
+    '401':
+      description: Не авторизований
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+
+post:
+  tags:
+    - Contacts
+  summary: Створити контакт
+  description: Створює новий контакт
+  security:
+    - bearerAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - name
+            - email
+            - phone
+          properties:
+            name:
+              type: string
+              description: Ім'я контакту
+            email:
+              type: string
+              format: email
+              description: Email контакту
+            phone:
+              type: string
+              description: Номер телефону контакту
+            favorite:
+              type: boolean
+              default: false
+              description: Чи є контакт улюбленим
+  responses:
+    '201':
+      description: Контакт створено
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Contact.yaml'
+    '400':
+      description: Невалідні дані
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+    '401':
+      description: Не авторизований
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'

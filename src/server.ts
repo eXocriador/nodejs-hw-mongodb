@@ -5,6 +5,8 @@ import cookieParser from 'cookie-parser';
 import compression from 'compression';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import swaggerUi from 'swagger-ui-express';
+import swaggerDocument from '../docs/swagger.json';
 
 import { getEnvVar } from './utils/getEnvVar.ts';
 import router from './routers/index.ts';
@@ -42,6 +44,9 @@ export const serverSetup = (): Express => {
   // Logging and routing
   app.use(logger);
   app.use(router);
+
+  // Swagger UI
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
   // Error handling
   app.use(notFoundHandler);

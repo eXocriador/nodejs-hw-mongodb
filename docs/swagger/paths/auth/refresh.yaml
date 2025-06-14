@@ -1,0 +1,23 @@
+post:
+  tags:
+    - Auth
+  summary: Оновлення токену
+  description: Оновлює access token за допомогою refresh token
+  responses:
+    '200':
+      description: Токен оновлено
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/AuthResponse.yaml'
+      headers:
+        Set-Cookie:
+          schema:
+            type: string
+            description: Cookie з новим refresh токеном
+    '401':
+      description: Невалідний або прострочений refresh token
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'

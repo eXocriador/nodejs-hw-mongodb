@@ -1,0 +1,13 @@
+type: object
+required:
+  - message
+properties:
+  message:
+    type: string
+    description: Повідомлення про помилку
+  status:
+    type: integer
+    description: HTTP статус код
+  data:
+    type: object
+    description: Додаткові дані про помилку

@@ -1,0 +1,106 @@
+parameters:
+  - in: path
+    name: contactId
+    required: true
+    schema:
+      type: string
+    description: ID контакту
+
+get:
+  tags:
+    - Contacts
+  summary: Отримати контакт за ID
+  description: Повертає контакт за його ID
+  security:
+    - bearerAuth: []
+  responses:
+    '200':
+      description: Контакт знайдено
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Contact.yaml'
+    '404':
+      description: Контакт не знайдено
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+    '401':
+      description: Не авторизований
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+
+patch:
+  tags:
+    - Contacts
+  summary: Оновити контакт
+  description: Оновлює існуючий контакт
+  security:
+    - bearerAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+            email:
+              type: string
+              format: email
+            phone:
+              type: string
+            favorite:
+              type: boolean
+  responses:
+    '200':
+      description: Контакт оновлено
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Contact.yaml'
+    '400':
+      description: Невалідні дані
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+    '404':
+      description: Контакт не знайдено
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+    '401':
+      description: Не авторизований
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+
+delete:
+  tags:
+    - Contacts
+  summary: Видалити контакт
+  description: Видаляє контакт за його ID
+  security:
+    - bearerAuth: []
+  responses:
+    '204':
+      description: Контакт видалено
+    '404':
+      description: Контакт не знайдено
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'
+    '401':
+      description: Не авторизований
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/Error.yaml'

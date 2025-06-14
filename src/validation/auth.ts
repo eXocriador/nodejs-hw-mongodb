@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import { AuthRequest, RequestResetEmailRequest, ResetPasswordRequest } from '../types/models.ts';
+import { AuthRequest, RequestResetEmailRequest, ResetPasswordRequest, LoginWithGoogleOAuthRequest } from '../types/models.ts';
 import { emailRegex } from '../constants/auth.ts';
 
 export const authSchema = Joi.object<AuthRequest>({
@@ -20,4 +20,11 @@ export const requestResetEmailSchema = Joi.object<RequestResetEmailRequest>({
 export const resetPasswordSchema = Joi.object<ResetPasswordRequest>({
   token: Joi.string().required(),
   password: Joi.string().min(6).required(),
+});
+
+export const loginWithGoogleOAuthSchema = Joi.object<LoginWithGoogleOAuthRequest>({
+  code: Joi.string().required(),
+  state: Joi.string(),
+  error: Joi.string(),
+  error_description: Joi.string(),
 });

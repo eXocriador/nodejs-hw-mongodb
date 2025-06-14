@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { authenticate } from '../middlewares/authenticate.ts';
 import { validateBody } from '../middlewares/validateBody.ts';
-import { authSchema, loginSchema, requestResetEmailSchema, resetPasswordSchema } from '../validation/auth.ts';
+import { authSchema, loginSchema, loginWithGoogleOAuthSchema, requestResetEmailSchema, resetPasswordSchema } from '../validation/auth.ts';
 import {
   register,
   login,
@@ -9,20 +9,27 @@ import {
   getCurrentUser,
   refresh,
   sendResetEmail,
-  handleResetPassword
+  handleResetPassword,
+  getGoogleOAuthUrlController,
+  loginWithGoogleController
 } from '../controllers/auth.ts';
+import { ctrlWrapper } from '../utils/ctrlWrapper.ts';
 
 const router = Router();
 
 // Public routes
-router.post('/register', validateBody(authSchema), register);
-router.post('/login', validateBody(loginSchema), login);
-router.post('/refresh', refresh);
-router.post('/send-reset-email', validateBody(requestResetEmailSchema), sendResetEmail);
-router.post('/reset-pwd', validateBody(resetPasswordSchema), handleResetPassword);
+router.post('/register', validateBody(authSchema), ctrlWrapper(register));
+router.post('/login', validateBody(loginSchema), ctrlWrapper(login));
+router.post('/refresh', ctrlWrapper(refresh));
+router.post('/send-reset-email', validateBody(requestResetEmailSchema), ctrlWrapper(sendResetEmail));
+router.post('/reset-pwd', validateBody(resetPasswordSchema), ctrlWrapper(handleResetPassword));
+
+// Google OAuth routes
+router.get('/google', ctrlWrapper(getGoogleOAuthUrlController));
+router.post('/google/callback', validateBody(loginWithGoogleOAuthSchema), ctrlWrapper(loginWithGoogleController));
 
 // Protected routes
-router.post('/logout', authenticate, logout);
-router.get('/current', authenticate, getCurrentUser);
+router.post('/logout', authenticate, ctrlWrapper(logout));
+router.get('/current', authenticate, ctrlWrapper(getCurrentUser));
 
 export default router;

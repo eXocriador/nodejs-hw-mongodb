@@ -1,100 +1,167 @@
-// import { UsersCollection } from '../db/models/user.ts';
-// import { sendEmail } from './email.ts';
-// import { TEMPLATES_DIR } from '../constants/index.ts';
-// import path from 'path';
-// import fs from 'fs/promises';
-// import handlebars from 'handlebars';
-// import createHttpError from 'http-errors';
-import { IUser } from '../types/models.ts'; //ResetPasswordRequest
-import jwt from 'jsonwebtoken';
-import { getEnvVar } from '../utils/getEnvVar.ts';
-import bcrypt from 'bcryptjs';
+import User from '../db/models/user';
+import Session, { ISession } from '../db/models/session';
+import { validateCode, verifyGoogleToken } from '../utils/googleOAuth2';
+import createHttpError from 'http-errors';
+import { sign, verify, SignOptions } from 'jsonwebtoken';
+import { compare, hash } from 'bcrypt';
+import { Types } from 'mongoose';
+import { randomBytes } from 'crypto';
+import { IUser } from '../types/models';
+import { getEnvVar } from '../utils/getEnvVar';
 
 const JWT_SECRET = getEnvVar('JWT_SECRET');
 const SALT_ROUNDS = 10;
 
 export const hashPassword = async (password: string): Promise<string> => {
-  return bcrypt.hash(password, SALT_ROUNDS);
+  return hash(password, SALT_ROUNDS);
 };
 
 export const comparePassword = async (
   password: string,
   hashedPassword: string
 ): Promise<boolean> => {
-  return bcrypt.compare(password, hashedPassword);
+  return compare(password, hashedPassword);
 };
 
 export const generateToken = (user: IUser): string => {
-  return jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1d' });
+  const payload = { id: user._id };
+  const options: SignOptions = { expiresIn: '1d' };
+  return sign(payload, JWT_SECRET, options);
 };
 
 export const verifyToken = (token: string): { id: string } => {
-  return jwt.verify(token, JWT_SECRET) as { id: string };
+  return verify(token, JWT_SECRET) as { id: string };
 };
 
-// export const requestResetToken = async (email: string):Promise<void> => {
-//   const user = await UsersCollection.findOne({ email });
-//   if (!user) {
-//     throw createHttpError(404, 'User not found');
-//   }
+export const register = async (
+  name: string,
+  email: string,
+  password: string
+): Promise<IUser> => {
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    throw createHttpError(409, 'Email already in use');
+  }
 
-//   const resetToken = jwt.sign(
-//     {
-//       sub: user._id,
-//       email,
-//     },
-//     JWT_SECRET,
-//     {
-//       expiresIn: '15m',
-//     },
-//   );
+  const hashedPassword = await hashPassword(password);
+  const user = await User.create({
+    name,
+    email,
+    password: hashedPassword,
+  });
 
-//   const resetPasswordTemplatePath = path.join(
-//     TEMPLATES_DIR,
-//     'reset-password-email.html',
-//   );
+  return user;
+};
 
-//   const templateSource = (
-//     await fs.readFile(resetPasswordTemplatePath)
-//   ).toString();
+export const login = async (
+  email: string,
+  password: string
+): Promise<ISession> => {
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw createHttpError(401, 'Invalid email or password');
+  }
 
-//   const template = handlebars.compile(templateSource);
-//   const html = template({
-//     link: `${getEnvVar('APP_DOMAIN')}/reset-password?token=${resetToken}`,
-//     year: new Date().getFullYear()
-//   });
+  const isPasswordValid = await comparePassword(password, user.password);
+  if (!isPasswordValid) {
+    throw createHttpError(401, 'Invalid email or password');
+  }
 
-//   await sendEmail({
-//     to: email,
-//     subject: 'Reset your password',
-//     html,
-//   });
-// };
+  const accessToken = generateToken(user);
+  const refreshToken = randomBytes(40).toString('hex');
+  const now = new Date();
+  const accessTokenValidUntil = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 1 day
+  const refreshTokenValidUntil = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days
 
+  const session = await Session.create({
+    userId: user._id,
+    accessToken,
+    refreshToken,
+    accessTokenValidUntil,
+    refreshTokenValidUntil,
+  });
 
-// export const resetPassword = async (payload: ResetPasswordRequest): Promise<void> => {
-//   let entries;
+  return session;
+};
 
-//   try {
-//     entries = jwt.verify(payload.token, JWT_SECRET) as { email: string, sub: string };
-//   } catch (err) {
-//     if (err instanceof Error) throw createHttpError(401, err.message);
-//     throw err;
-//   }
+export const loginOrSignupWithGoogle = async (
+  code: string
+): Promise<ISession> => {
+  const ticket = await validateCode(code);
+  const payload = ticket.getPayload();
 
-//   const user = await UsersCollection.findOne({
-//     email: entries.email,
-//     _id: entries.sub,
-//   });
+  if (!payload || !payload.email) {
+    throw createHttpError(401, 'Invalid Google token');
+  }
 
-//   if (!user) {
-//     throw createHttpError(404, 'User not found');
-//   }
+  let user = await User.findOne({ email: payload.email });
+  if (!user) {
+    const password = await hash(randomBytes(10).toString('hex'), 10);
+    user = await User.create({
+      email: payload.email,
+      name: payload.name || 'Google User',
+      password,
+    });
+  }
 
-//   const encryptedPassword = await hashPassword(payload.password);
+  const accessToken = generateToken(user);
+  const refreshToken = randomBytes(40).toString('hex');
+  const now = new Date();
+  const accessTokenValidUntil = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 1 day
+  const refreshTokenValidUntil = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days
 
-//   await UsersCollection.updateOne(
-//     { _id: user._id },
-//     { password: encryptedPassword },
-//   );
-// };
+  const session = await Session.create({
+    userId: user._id,
+    accessToken,
+    refreshToken,
+    accessTokenValidUntil,
+    refreshTokenValidUntil,
+  });
+
+  return session;
+};
+
+export const refresh = async (
+  refreshToken: string
+): Promise<ISession> => {
+  const session = await Session.findOne({
+    refreshToken,
+    refreshTokenValidUntil: { $gt: new Date() },
+  });
+
+  if (!session) {
+    throw createHttpError(401, 'Invalid refresh token');
+  }
+
+  const user = await User.findById(session.userId);
+  if (!user) {
+    throw createHttpError(401, 'User not found');
+  }
+
+  const accessToken = generateToken(user);
+  const newRefreshToken = randomBytes(40).toString('hex');
+  const now = new Date();
+  const accessTokenValidUntil = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 1 day
+  const refreshTokenValidUntil = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days
+
+  const updatedSession = await Session.findByIdAndUpdate(
+    session._id,
+    {
+      accessToken,
+      refreshToken: newRefreshToken,
+      accessTokenValidUntil,
+      refreshTokenValidUntil,
+    },
+    { new: true }
+  );
+
+  if (!updatedSession) {
+    throw createHttpError(500, 'Failed to update session');
+  }
+
+  return updatedSession;
+};
+
+export const logout = async (refreshToken: string): Promise<void> => {
+  await Session.findOneAndDelete({ refreshToken });
+};
