@@ -1,0 +1,50 @@
+openapi: 3.1.0
+info:
+  version: 1.0.0
+  title: Contacts API
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  description: |
+    API для управління контактами з підтримкою авторизації та Google OAuth.
+    Дозволяє створювати, читати, оновлювати та видаляти контакти.
+tags:
+  - name: Auth
+    description: Операції авторизації та аутентифікації
+  - name: Contacts
+    description: Операції з контактами
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+  - url: https://your-app.onrender.com
+    description: Production server
+paths:
+  /api/auth/register:
+    $ref: './swagger/paths/auth/register.yaml'
+  /api/auth/login:
+    $ref: './swagger/paths/auth/login.yaml'
+  /api/auth/google:
+    $ref: './swagger/paths/auth/google.yaml'
+  /api/auth/refresh:
+    $ref: './swagger/paths/auth/refresh.yaml'
+  /api/auth/logout:
+    $ref: './swagger/paths/auth/logout.yaml'
+  /api/contacts:
+    $ref: './swagger/paths/contacts/index.yaml'
+  /api/contacts/{contactId}:
+    $ref: './swagger/paths/contacts/{id}.yaml'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Contact:
+      $ref: './swagger/components/schemas/Contact.yaml'
+    User:
+      $ref: './swagger/components/schemas/User.yaml'
+    Error:
+      $ref: './swagger/components/schemas/Error.yaml'
+    AuthResponse:
+      $ref: './swagger/components/schemas/AuthResponse.yaml'
