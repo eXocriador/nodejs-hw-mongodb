@@ -183,8 +183,13 @@ export const sendResetEmail = ctrlWrapper(async (
   const template = handlebars.compile(templateSource);
   const html = template({
     link: resetURL,
-    year: new Date().getFullYear()
+    year: new Date().getFullYear(),
+    timestamp: new Date().toISOString(),
+    requestIp: req.ip
   });
+
+  console.log('Sending reset password email to:', email);
+  console.log('Reset URL:', resetURL);
 
   await sendEmail({
     to: email,
@@ -204,8 +209,11 @@ export const handleResetPassword = ctrlWrapper(async (
   res: Response,
   _next: NextFunction
 ): Promise<void> => {
+  console.log('Reset password request received:', req.body);
+
   const { error } = resetPasswordSchema.validate(req.body);
   if (error) {
+    console.error('Validation error:', error);
     throw createHttpError(400, error.message);
   }
 
@@ -213,8 +221,11 @@ export const handleResetPassword = ctrlWrapper(async (
   let decoded: { email: string };
 
   try {
+    console.log('Verifying token...');
     decoded = jwt.verify(token, JWT_SECRET) as { email: string };
+    console.log('Token decoded:', decoded);
   } catch (err) {
+    console.error('Token verification error:', err);
     if (err instanceof jwt.TokenExpiredError) {
       throw createHttpError(401, 'Token is expired.');
     }
@@ -223,14 +234,17 @@ export const handleResetPassword = ctrlWrapper(async (
 
   const user = await User.findOne({ email: decoded.email });
   if (!user) {
+    console.error('User not found:', decoded.email);
     throw createHttpError(404, 'User not found!');
   }
 
+  console.log('Updating password for user:', decoded.email);
   user.password = await hashPassword(password);
   await user.save();
 
   // Delete all active sessions for this user
   await Session.deleteMany({ userId: user._id });
+  console.log('Password reset successful for user:', decoded.email);
 
   res.status(200).json({
     status: 200,

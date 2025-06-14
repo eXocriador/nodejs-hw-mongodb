@@ -21,8 +21,8 @@ const router = Router();
 router.post('/register', validateBody(authSchema), ctrlWrapper(register));
 router.post('/login', validateBody(loginSchema), ctrlWrapper(login));
 router.post('/refresh', ctrlWrapper(refresh));
-router.post('/send-reset-email', validateBody(requestResetEmailSchema), ctrlWrapper(sendResetEmail));
-router.post('/reset-pwd', validateBody(resetPasswordSchema), ctrlWrapper(handleResetPassword));
+router.post('/forgot-password', validateBody(requestResetEmailSchema), ctrlWrapper(sendResetEmail));
+router.post('/reset-password', validateBody(resetPasswordSchema), ctrlWrapper(handleResetPassword));
 
 // Google OAuth routes
 router.get('/google', ctrlWrapper(getGoogleOAuthUrlController));
