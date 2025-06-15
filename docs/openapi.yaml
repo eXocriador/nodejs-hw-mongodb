@@ -16,7 +16,7 @@ tags:
 servers:
   - url: http://localhost:3000
     description: Local development server
-  - url: https://contacts-app-backend.onrender.com
+  - url: https://goit.exocriador.art
     description: Production server
 paths:
   /auth/register:
