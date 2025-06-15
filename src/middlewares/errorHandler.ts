@@ -1,6 +1,6 @@
-import type { Request, Response, NextFunction } from 'express';
-import { ErrorResponse } from '../types/index.ts';
-import { getEnvVar } from '../utils/getEnvVar.ts';
+import { Request, Response, NextFunction } from 'express';
+import { ErrorResponse } from '../types/index';
+import { getEnvVar } from '../utils/getEnvVar';
 
 const isDevelopment = getEnvVar('NODE_ENV') === 'development';
 

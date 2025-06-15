@@ -86,7 +86,7 @@ export const login = async (
 
 export const loginOrSignupWithGoogle = async (
   code: string
-): Promise<ISession> => {
+): Promise<{ user: IUser; accessToken: string; refreshToken: string }> => {
   const ticket = await validateCode(code);
   const payload = ticket.getPayload();
 
@@ -110,7 +110,7 @@ export const loginOrSignupWithGoogle = async (
   const accessTokenValidUntil = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 1 day
   const refreshTokenValidUntil = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days
 
-  const session = await Session.create({
+  await Session.create({
     userId: user._id,
     accessToken,
     refreshToken,
@@ -118,7 +118,7 @@ export const loginOrSignupWithGoogle = async (
     refreshTokenValidUntil,
   });
 
-  return session;
+  return { user, accessToken, refreshToken };
 };
 
 export const refresh = async (

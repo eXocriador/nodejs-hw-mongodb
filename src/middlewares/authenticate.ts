@@ -1,9 +1,9 @@
-import type { Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { CustomRequest } from '../types/index.ts';
-import User from '../db/models/user.ts';
-import Session from '../db/models/session.ts';
-import { getEnvVar } from '../utils/getEnvVar.ts';
+import { CustomRequest } from '../types/index';
+import User from '../db/models/user';
+import Session from '../db/models/session';
+import { getEnvVar } from '../utils/getEnvVar';
 import createHttpError from 'http-errors';
 
 const JWT_SECRET = getEnvVar('JWT_SECRET');

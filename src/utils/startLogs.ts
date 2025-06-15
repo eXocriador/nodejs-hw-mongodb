@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import boxen from 'boxen';
 import os from 'os';
-import { getEnvVar } from './getEnvVar.ts';
+import { getEnvVar } from './getEnvVar';
 import mongoose from 'mongoose';
 
 const getLocalIP = (): string => {

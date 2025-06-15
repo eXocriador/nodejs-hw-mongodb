@@ -5,19 +5,19 @@ import path from 'path';
 import fs from 'fs/promises';
 import handlebars from 'handlebars';
 
-import { IUser } from '../types/models.ts';
-import { CustomRequest } from '../types/index.ts';
-import { hashPassword, comparePassword } from '../services/auth.ts';
-import { authSchema, loginSchema, requestResetEmailSchema, resetPasswordSchema } from '../validation/auth.ts';
-import User from '../db/models/user.ts';
-import Session from '../db/models/session.ts';
-import { generateAuthTokens, createSession, deleteSession, findSessionByRefreshToken, setupSession } from '../services/session.ts';
-import { ctrlWrapper } from '../utils/ctrlWrapper.ts';
-import { getEnvVar } from '../utils/getEnvVar.ts';
-import { sendEmail } from '../services/email.ts';
-import { TEMPLATES_DIR } from '../constants/index.ts';
-import { generateAuthUrl } from '../utils/googleOAuth2.ts';
-import { loginOrSignupWithGoogle } from '../services/auth.ts';
+import { IUser } from '../types/models';
+import { CustomRequest } from '../types/index';
+import { hashPassword, comparePassword } from '../services/auth';
+import { authSchema, loginSchema, requestResetEmailSchema, resetPasswordSchema, loginWithGoogleOAuthSchema, updateProfileSchema } from '../validation/auth';
+import User from '../db/models/user';
+import Session from '../db/models/session';
+import { generateAuthTokens, createSession, deleteSession, findSessionByRefreshToken, setupSession } from '../services/session';
+import { ctrlWrapper } from '../utils/ctrlWrapper';
+import { getEnvVar } from '../utils/getEnvVar';
+import { sendEmail } from '../services/email';
+import { TEMPLATES_DIR } from '../constants/index';
+import { generateAuthUrl } from '../utils/googleOAuth2';
+import { loginOrSignupWithGoogle } from '../services/auth';
 
 
 const JWT_SECRET = getEnvVar('JWT_SECRET');
@@ -40,16 +40,18 @@ export const register = ctrlWrapper(async (
 
   const hashedPassword = await hashPassword(password);
 
-  await User.create({
+  const user = await User.create({
     name,
     email,
     password: hashedPassword,
   });
 
+  const { password: _, ...userWithoutPassword } = user.toObject();
+
   res.status(201).json({
     status: 201,
     message: "Successfully registered a user!",
-    data: {}
+    data: userWithoutPassword
   });
 });
 
@@ -199,7 +201,7 @@ export const sendResetEmail = ctrlWrapper(async (
 
   res.status(200).json({
     status: 200,
-    message: 'Reset password email has been successfully sent.',
+    message: 'Password reset email sent successfully!',
     data: {}
   });
 });
@@ -209,71 +211,110 @@ export const handleResetPassword = ctrlWrapper(async (
   res: Response,
   _next: NextFunction
 ): Promise<void> => {
-  console.log('Reset password request received:', req.body);
-
   const { error } = resetPasswordSchema.validate(req.body);
   if (error) {
-    console.error('Validation error:', error);
     throw createHttpError(400, error.message);
   }
 
   const { token, password } = req.body;
-  let decoded: { email: string };
+
+  if (!token) {
+    throw createHttpError(400, 'Reset token is missing');
+  }
 
   try {
-    console.log('Verifying token...');
-    decoded = jwt.verify(token, JWT_SECRET) as { email: string };
-    console.log('Token decoded:', decoded);
-  } catch (err) {
-    console.error('Token verification error:', err);
-    if (err instanceof jwt.TokenExpiredError) {
-      throw createHttpError(401, 'Token is expired.');
+    const decoded = jwt.verify(token, JWT_SECRET) as { email: string };
+    const user = await User.findOne({ email: decoded.email });
+
+    if (!user) {
+      throw createHttpError(404, 'User not found for this token');
     }
-    throw createHttpError(401, 'Token is invalid.');
+
+    user.password = await hashPassword(password);
+    await user.save();
+
+    // Delete all user sessions after password reset
+    await Session.deleteMany({ userId: user._id });
+
+    res.status(200).json({
+      status: 200,
+      message: 'Password has been reset successfully!',
+      data: {}
+    });
+  } catch (err) {
+    if (err instanceof jwt.JsonWebTokenError) {
+      throw createHttpError(400, 'Invalid or expired token');
+    }
+    throw createHttpError(500, 'Failed to reset password');
+  }
+});
+
+export const getGoogleOAuthUrlController = async (
+  _req: Request,
+  res: Response,
+) => {
+  console.log("Attempting to generate Google OAuth URL...");
+  const url = generateAuthUrl();
+  console.log("Generated Google OAuth URL:", url);
+  res.json({ url });
+};
+
+export const loginWithGoogleController = async (
+  req: CustomRequest,
+  res: Response,
+) => {
+  const { error } = loginWithGoogleOAuthSchema.validate(req.body);
+  if (error) {
+    throw createHttpError(400, error.message);
   }
 
-  const user = await User.findOne({ email: decoded.email });
-  if (!user) {
-    console.error('User not found:', decoded.email);
-    throw createHttpError(404, 'User not found!');
-  }
+  const { code } = req.body;
 
-  console.log('Updating password for user:', decoded.email);
-  user.password = await hashPassword(password);
-  await user.save();
+  const { user, accessToken, refreshToken } = await loginOrSignupWithGoogle(code);
 
-  // Delete all active sessions for this user
-  await Session.deleteMany({ userId: user._id });
-  console.log('Password reset successful for user:', decoded.email);
+  await setupSession(user, accessToken, refreshToken, res);
 
   res.status(200).json({
     status: 200,
-    message: 'Password has been successfully reset.',
-    data: {}
+    message: 'Successfully logged in with Google!',
+    data: { user, accessToken, refreshToken },
+  });
+};
+
+export const updateProfileController = ctrlWrapper(async (
+  req: CustomRequest,
+  res: Response,
+  _next: NextFunction
+) => {
+  const { error } = updateProfileSchema.validate(req.body);
+  if (error) {
+    throw createHttpError(400, error.message);
+  }
+
+  const user = req.user as IUser;
+
+  const { name, email, currentPassword, newPassword } = req.body;
+
+  if (name) user.name = name;
+  if (email) user.email = email;
+
+  if (newPassword && !currentPassword) {
+    throw createHttpError(400, 'Current password is required to set a new password');
+  }
+
+  if (newPassword && currentPassword) {
+    const isPasswordValid = await comparePassword(currentPassword, user.password);
+    if (!isPasswordValid) {
+      throw createHttpError(401, 'Current password is wrong');
+    }
+    user.password = await hashPassword(newPassword);
+  }
+
+  await user.save();
+
+  res.status(200).json({
+    status: 200,
+    message: 'Profile updated successfully!',
+    data: user,
   });
 });
-
-export const getGoogleOAuthUrlController = async (req: Request, res: Response) => {
-  const url = generateAuthUrl();
-  res.json({
-    status: 200,
-    message: 'Successfully get Google OAuth url!',
-    data: {
-      url,
-    },
-  });
-};
-
-
-export const loginWithGoogleController = async (req: CustomRequest, res: Response) => {
-  const session = await loginOrSignupWithGoogle(req.body.code);
-  setupSession(res, session);
-
-  res.json({
-    status: 200,
-    message: 'Successfully logged in via Google OAuth!',
-    data: {
-      accessToken: session.accessToken,
-    },
-  });
-};

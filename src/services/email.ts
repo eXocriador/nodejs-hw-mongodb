@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
-import { getEnvVar } from '../utils/getEnvVar.ts';
-import { EmailOptions } from '../types/models.ts';
+import { getEnvVar } from '../utils/getEnvVar';
+import { EmailOptions } from '../types/models';
 import createHttpError from 'http-errors';
 
 const SMTP_HOST = getEnvVar('SMTP_HOST', 'smtp-relay.brevo.com');

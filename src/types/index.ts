@@ -1,5 +1,5 @@
 import { Request, Express } from 'express';
-import { IUser } from './models.ts';
+import { IUser } from './models';
 
 
 export interface CustomRequest extends Request {

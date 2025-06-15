@@ -1,7 +1,7 @@
 // import path from 'node:path';
 
-export * from './auth.ts';
-export * from './contacts.ts';
+export * from './auth';
+export * from './contacts';
 import path from 'path';
 
 export const TEMPLATES_DIR = path.join(process.cwd(), 'src', 'templates');

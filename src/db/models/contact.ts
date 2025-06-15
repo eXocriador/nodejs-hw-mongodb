@@ -1,7 +1,7 @@
 import { model, Schema } from 'mongoose';
-import { handeSaveError, setUpdateSettings } from './hooks.ts';
-import { IContact } from '../../types/models.ts'; // Імпортуємо IContact з types/models.ts
-import { typeList } from '../../constants/contacts.ts';
+import { handeSaveError, setUpdateSettings } from './hooks';
+import { IContact } from '../../types/models'; // Імпортуємо IContact з types/models.ts
+import { typeList } from '../../constants/contacts';
 
 const contactSchema = new Schema<IContact>(
   {
@@ -11,7 +11,6 @@ const contactSchema = new Schema<IContact>(
     },
     email: {
       type: String,
-      required: [true, 'Email is required'],
     },
     phone: {
       type: String,

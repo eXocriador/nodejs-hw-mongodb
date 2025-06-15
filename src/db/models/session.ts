@@ -1,5 +1,5 @@
 import { model, Schema, Types, Document } from 'mongoose';
-import { handeSaveError, setUpdateSettings } from './hooks.ts';
+import { handeSaveError, setUpdateSettings } from './hooks';
 
 export interface ISession extends Document {
   userId: Types.ObjectId;
