@@ -19,7 +19,6 @@ import { TEMPLATES_DIR } from '../constants/index';
 import { generateAuthUrl } from '../utils/googleOAuth2';
 import { loginOrSignupWithGoogle } from '../services/auth';
 
-
 const JWT_SECRET = getEnvVar('JWT_SECRET');
 
 export const register = ctrlWrapper(async (
@@ -83,7 +82,7 @@ export const login = ctrlWrapper(async (
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
-    expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+    expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
   });
 
   res.json({
@@ -151,7 +150,7 @@ export const refresh = ctrlWrapper(async (
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
-    expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+    expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
   });
 
   res.json({
@@ -177,7 +176,7 @@ export const sendResetEmail = ctrlWrapper(async (
     throw createHttpError(404, 'User not found!');
   }
 
-  const resetToken = jwt.sign({ email: user.email }, JWT_SECRET, { expiresIn: '5m' }); // 5 minutes expiry
+  const resetToken = jwt.sign({ email: user.email }, JWT_SECRET, { expiresIn: '5m' });
   const resetURL = `${getEnvVar('APP_DOMAIN')}/reset-password?token=${resetToken}`;
 
   const resetPasswordTemplatePath = path.join(TEMPLATES_DIR, 'reset-password-email.html');
@@ -189,9 +188,6 @@ export const sendResetEmail = ctrlWrapper(async (
     timestamp: new Date().toISOString(),
     requestIp: req.ip
   });
-
-  console.log('Sending reset password email to:', email);
-  console.log('Reset URL:', resetURL);
 
   await sendEmail({
     to: email,
@@ -233,7 +229,6 @@ export const handleResetPassword = ctrlWrapper(async (
     user.password = await hashPassword(password);
     await user.save();
 
-    // Delete all user sessions after password reset
     await Session.deleteMany({ userId: user._id });
 
     res.status(200).json({

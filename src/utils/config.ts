@@ -21,11 +21,10 @@ const validateConfig = (): Config => {
     PORT: Number(getEnvVar('PORT', '3000')),
     JWT_SECRET: getEnvVar('JWT_SECRET'),
     CORS_ORIGIN: getEnvVar('CORS_ORIGIN', '*'),
-    RATE_LIMIT_WINDOW_MS: Number(getEnvVar('RATE_LIMIT_WINDOW_MS', '900000')), // 15 minutes
+    RATE_LIMIT_WINDOW_MS: Number(getEnvVar('RATE_LIMIT_WINDOW_MS', '900000')),
     RATE_LIMIT_MAX: Number(getEnvVar('RATE_LIMIT_MAX', '100')),
   };
 
-  // Optional configurations
   try {
     config.MONGODB_URI = getEnvVar('MONGODB_URI', 'mongodb://localhost:27017/contacts_app');
   } catch (error) {
@@ -42,7 +41,6 @@ const validateConfig = (): Config => {
     console.warn('SMTP configuration not set, email functionality will be disabled');
   }
 
-  // Validate required fields
   const requiredFields: (keyof Config)[] = ['JWT_SECRET'];
 
   for (const field of requiredFields) {
@@ -51,7 +49,6 @@ const validateConfig = (): Config => {
     }
   }
 
-  // Validate numeric fields
   const numericFields: (keyof Config)[] = ['PORT', 'RATE_LIMIT_WINDOW_MS', 'RATE_LIMIT_MAX'];
   for (const field of numericFields) {
     if (isNaN(config[field] as number)) {

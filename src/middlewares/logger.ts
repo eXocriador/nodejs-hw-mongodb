@@ -1,7 +1,8 @@
 import pinoHttp from 'pino-http';
 import { getEnvVar } from '../utils/getEnvVar';
+import { Request, Response } from 'express';
 
-const isDevelopment = getEnvVar('NODE_ENV') === 'development';
+const isDevelopment: boolean = getEnvVar('NODE_ENV') === 'development';
 
 export const logger = pinoHttp({
   level: isDevelopment ? 'debug' : 'info',
@@ -13,16 +14,16 @@ export const logger = pinoHttp({
       translateTime: 'SYS:standard',
     },
   },
-  customLogLevel: (req, res, error) => {
+  customLogLevel: (req: Request, res: Response, error?: Error): string => {
     if (res.statusCode >= 400 && !error) return 'warn';
     if (error) return 'error';
     if (res.statusCode >= 300) return 'silent';
     return 'info';
   },
-  customSuccessMessage: (req, res) => {
+  customSuccessMessage: (req: Request, res: Response): string => {
     return `${req.method} ${req.url} ${res.statusCode}`;
   },
-  customErrorMessage: (req, res, error) => {
+  customErrorMessage: (req: Request, res: Response, error: Error): string => {
     return `${req.method} ${req.url} ${res.statusCode} - ${error.message}`;
   },
 });

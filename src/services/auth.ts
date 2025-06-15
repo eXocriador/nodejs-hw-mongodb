@@ -8,6 +8,7 @@ import { Types } from 'mongoose';
 import { randomBytes } from 'crypto';
 import { IUser } from '../types/models';
 import { getEnvVar } from '../utils/getEnvVar';
+import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = getEnvVar('JWT_SECRET');
 const SALT_ROUNDS = 10;
@@ -29,8 +30,17 @@ export const generateToken = (user: IUser): string => {
   return sign(payload, JWT_SECRET, options);
 };
 
-export const verifyToken = (token: string): { id: string } => {
-  return verify(token, JWT_SECRET) as { id: string };
+export const verifyToken = async (token: string) => {
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as { id: string };
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      throw createHttpError(404, 'User not found');
+    }
+    return user;
+  } catch (error) {
+    throw createHttpError(401, 'Invalid token');
+  }
 };
 
 export const register = async (
@@ -70,8 +80,8 @@ export const login = async (
   const accessToken = generateToken(user);
   const refreshToken = randomBytes(40).toString('hex');
   const now = new Date();
-  const accessTokenValidUntil = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 1 day
-  const refreshTokenValidUntil = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days
+  const accessTokenValidUntil = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+  const refreshTokenValidUntil = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
   const session = await Session.create({
     userId: user._id,
@@ -107,8 +117,8 @@ export const loginOrSignupWithGoogle = async (
   const accessToken = generateToken(user);
   const refreshToken = randomBytes(40).toString('hex');
   const now = new Date();
-  const accessTokenValidUntil = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 1 day
-  const refreshTokenValidUntil = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days
+  const accessTokenValidUntil = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+  const refreshTokenValidUntil = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
   await Session.create({
     userId: user._id,
@@ -121,47 +131,36 @@ export const loginOrSignupWithGoogle = async (
   return { user, accessToken, refreshToken };
 };
 
-export const refresh = async (
-  refreshToken: string
-): Promise<ISession> => {
-  const session = await Session.findOne({
-    refreshToken,
-    refreshTokenValidUntil: { $gt: new Date() },
-  });
-
+export const refreshTokens = async (refreshToken: string) => {
+  const session = await Session.findOne({ refreshToken });
   if (!session) {
     throw createHttpError(401, 'Invalid refresh token');
   }
 
-  const user = await User.findById(session.userId);
-  if (!user) {
-    throw createHttpError(401, 'User not found');
-  }
-
-  const accessToken = generateToken(user);
-  const newRefreshToken = randomBytes(40).toString('hex');
   const now = new Date();
-  const accessTokenValidUntil = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 1 day
-  const refreshTokenValidUntil = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days
+  const accessTokenValidUntil = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+  const refreshTokenValidUntil = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
-  const updatedSession = await Session.findByIdAndUpdate(
-    session._id,
+  const newAccessToken = jwt.sign({ id: session.userId }, JWT_SECRET, { expiresIn: '1d' });
+  const newRefreshToken = jwt.sign({ id: session.userId }, JWT_SECRET, { expiresIn: '7d' });
+
+  await Session.findOneAndUpdate(
+    { refreshToken },
     {
-      accessToken,
+      accessToken: newAccessToken,
       refreshToken: newRefreshToken,
       accessTokenValidUntil,
       refreshTokenValidUntil,
-    },
-    { new: true }
+    }
   );
 
-  if (!updatedSession) {
-    throw createHttpError(500, 'Failed to update session');
-  }
-
-  return updatedSession;
+  return { accessToken: newAccessToken, refreshToken: newRefreshToken };
 };
 
-export const logout = async (refreshToken: string): Promise<void> => {
-  await Session.findOneAndDelete({ refreshToken });
+export const invalidateSession = async (refreshToken: string) => {
+  await Session.deleteOne({ refreshToken });
+};
+
+export const invalidateAllSessions = async (userId: string) => {
+  await Session.deleteMany({ userId });
 };

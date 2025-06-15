@@ -1,5 +1,3 @@
-// import path from 'node:path';
-
 export * from './auth';
 export * from './contacts';
 import path from 'path';
@@ -8,7 +6,6 @@ export const TEMPLATES_DIR = path.join(process.cwd(), 'src', 'templates');
 
 export const TEMP_UPLOAD_DIR = path.join(process.cwd(), 'temp');
 export const UPLOAD_DIR = path.join(process.cwd(), 'uploads');
-// src/middlewares/multer.js
 
 export const SMTP = {
   SMTP_HOST: 'SMTP_HOST',

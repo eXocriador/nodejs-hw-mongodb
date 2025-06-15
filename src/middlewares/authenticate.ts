@@ -34,11 +34,10 @@ export const authenticate = async (
       throw createHttpError(401, 'Invalid access token');
     }
 
-    // Verify access token against an active session in the database
     const session = await Session.findOne({
       userId: decoded.id,
       accessToken: accessToken,
-      accessTokenValidUntil: { $gt: new Date() } // Ensure token is still valid by DB expiry
+      accessTokenValidUntil: { $gt: new Date() }
     });
 
     if (!session) {
@@ -54,11 +53,9 @@ export const authenticate = async (
     req.user = user;
     next();
   } catch (error) {
-    // Ensure proper error handling from createHttpError
     if (createHttpError.isHttpError(error)) {
       res.status(error.statusCode).json({ message: error.message });
     } else {
-      console.error('Authentication error:', error);
       res.status(500).json({ message: 'Internal server error' });
     }
   }
