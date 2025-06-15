@@ -1,29 +1,33 @@
 import { Request, Response, NextFunction } from 'express';
 import { register, login } from '../auth';
 import User from '../../db/models/user';
-import { hashPassword, comparePassword, generateToken } from '../../services/auth';
+import { hashPassword, comparePassword } from '../../services/auth';
+import { generateAuthTokens, setupSession } from '../../services/session';
 import createHttpError from 'http-errors';
 import { IUser } from '../../types/models';
 
 jest.mock('../../db/models/user');
 jest.mock('../../services/auth');
+jest.mock('../../services/session');
 
 describe('Auth Controller', () => {
   let mockRequest: Partial<Request>;
   let mockResponse: Partial<Response>;
   let mockNext: jest.Mock;
 
-  const mockUser: Partial<IUser> = {
+  const mockUserData = {
+    _id: 'mockUserId',
+    name: 'Test User',
+    email: 'test@example.com'
+  };
+
+  const mockUser = {
     _id: 'mockUserId',
     name: 'Test User',
     email: 'test@example.com',
     password: 'hashedPassword123',
-    toObject: () => ({
-      _id: 'mockUserId',
-      name: 'Test User',
-      email: 'test@example.com'
-    })
-  };
+    toObject: () => mockUserData
+  } as IUser;
 
   beforeEach(() => {
     mockRequest = {
@@ -45,6 +49,11 @@ describe('Auth Controller', () => {
       (User.findOne as jest.Mock).mockResolvedValue(null);
       (User.create as jest.Mock).mockResolvedValue(mockUser);
       (hashPassword as jest.Mock).mockResolvedValue('hashedPassword123');
+      (generateAuthTokens as jest.Mock).mockReturnValue({
+        accessToken: 'mockAccessToken',
+        refreshToken: 'mockRefreshToken'
+      });
+      (setupSession as jest.Mock).mockResolvedValue(undefined);
 
       await register(mockRequest as Request, mockResponse as Response, mockNext);
 
@@ -52,10 +61,10 @@ describe('Auth Controller', () => {
       expect(mockResponse.json).toHaveBeenCalledWith({
         status: 201,
         message: "Successfully registered a user!",
-        data: expect.objectContaining({
-          name: 'Test User',
-          email: 'test@example.com'
-        })
+        data: {
+          user: mockUserData,
+          accessToken: 'mockAccessToken'
+        }
       });
       expect(mockNext).not.toHaveBeenCalled();
     });
@@ -103,14 +112,21 @@ describe('Auth Controller', () => {
     it('should login user successfully', async () => {
       (User.findOne as jest.Mock).mockResolvedValue(mockUser);
       (comparePassword as jest.Mock).mockResolvedValue(true);
-      (generateToken as jest.Mock).mockReturnValue('mockToken123');
+      (generateAuthTokens as jest.Mock).mockReturnValue({
+        accessToken: 'mockAccessToken',
+        refreshToken: 'mockRefreshToken'
+      });
+      (setupSession as jest.Mock).mockResolvedValue(undefined);
 
       await login(mockRequest as Request, mockResponse as Response, mockNext);
 
       expect(mockResponse.json).toHaveBeenCalledWith({
         status: 200,
-        message: "Successfully logged in an user!",
-        data: { accessToken: 'mockToken123' }
+        message: "Successfully logged in!",
+        data: {
+          user: mockUserData,
+          accessToken: 'mockAccessToken'
+        }
       });
       expect(mockNext).not.toHaveBeenCalled();
     });
