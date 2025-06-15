@@ -3,6 +3,7 @@
 .DS_Store
 .idea
 google-oauth.json
+.env.test
 
 # Logs
 logs
