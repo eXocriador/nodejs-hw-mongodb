@@ -1,11 +1,11 @@
 import { OAuth2Client } from 'google-auth-library';
 import createHttpError from 'http-errors';
-import { getEnvVar } from './getEnvVar.ts';
+import { getEnvVar } from './getEnvVar';
 
 const client = new OAuth2Client(
   getEnvVar('GOOGLE_CLIENT_ID'),
   getEnvVar('GOOGLE_CLIENT_SECRET'),
-  getEnvVar('GOOGLE_REDIRECT_URI', 'http://localhost:3000/auth/google/callback')
+  getEnvVar('GOOGLE_REDIRECT_URI', 'http://localhost:5173/auth/google/callback')
 );
 
 export const generateAuthUrl = () =>

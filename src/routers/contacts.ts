@@ -1,17 +1,16 @@
 import { Router } from 'express';
-import { authenticate } from '../middlewares/authenticate.ts';
-import { validateBody } from '../middlewares/validateBody.ts';
-import { contactSchema, updateContactSchema } from '../validation/contacts.ts';
-import { upload } from '../middlewares/upload.ts';
-import { isValidId } from '../middlewares/isValidId.ts';
+import { authenticate } from '../middlewares/authenticate';
+import { validateBody } from '../middlewares/validateBody';
+import { contactSchema, updateContactSchema } from '../validation/contacts';
+import { upload } from '../middlewares/upload';
+import { isValidId } from '../middlewares/isValidId';
 import {
   getContacts,
   getContactById,
   createContact,
   updateContact,
-  deleteContact,
-  updateStatusContact
-} from '../controllers/contacts.ts';
+  deleteContact
+} from '../controllers/contacts';
 
 const router = Router();
 
@@ -22,6 +21,5 @@ router.get('/:contactId', isValidId, getContactById);
 router.post('/', upload.single('photo'), validateBody(contactSchema), createContact);
 router.patch('/:contactId', isValidId, upload.single('photo'), validateBody(updateContactSchema), updateContact);
 router.delete('/:contactId', isValidId, deleteContact);
-router.patch('/:contactId/favorite', isValidId, validateBody(updateContactSchema), updateStatusContact);
 
 export default router;

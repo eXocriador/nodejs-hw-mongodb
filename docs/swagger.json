@@ -15,7 +15,7 @@
       "description": "Local development server"
     },
     {
-      "url": "https://your-app.onrender.com",
+      "url": "https://contacts-app-backend.onrender.com",
       "description": "Production server"
     }
   ],
@@ -30,7 +30,7 @@
     }
   ],
   "paths": {
-    "/api/auth/register": {
+    "/auth/register": {
       "post": {
         "tags": [
           "Auth"
@@ -115,7 +115,7 @@
         }
       }
     },
-    "/api/auth/login": {
+    "/auth/login": {
       "post": {
         "tags": [
           "Auth"
@@ -190,7 +190,7 @@
         }
       }
     },
-    "/api/auth/google": {
+    "/auth/google": {
       "get": {
         "tags": [
           "Auth"
@@ -274,7 +274,7 @@
         }
       }
     },
-    "/api/auth/refresh": {
+    "/auth/refresh": {
       "post": {
         "tags": [
           "Auth"
@@ -313,7 +313,7 @@
         }
       }
     },
-    "/api/auth/logout": {
+    "/auth/logout": {
       "post": {
         "tags": [
           "Auth"
@@ -342,7 +342,7 @@
         }
       }
     },
-    "/api/contacts": {
+    "/contacts": {
       "get": {
         "tags": [
           "Contacts"
@@ -396,28 +396,40 @@
                     },
                     "message": {
                       "type": "string",
-                      "example": "Successfully retrieved contacts!"
+                      "example": "Successfully found contacts!"
                     },
                     "data": {
                       "type": "object",
                       "properties": {
-                        "contacts": {
+                        "data": {
                           "type": "array",
                           "items": {
                             "$ref": "#/components/schemas/Contact"
                           }
                         },
-                        "total": {
-                          "type": "integer",
-                          "description": "Загальна кількість контактів"
-                        },
                         "page": {
                           "type": "integer",
                           "description": "Поточна сторінка"
                         },
-                        "limit": {
+                        "perPage": {
                           "type": "integer",
                           "description": "Кількість контактів на сторінці"
+                        },
+                        "totalItems": {
+                          "type": "integer",
+                          "description": "Загальна кількість контактів"
+                        },
+                        "totalPages": {
+                          "type": "integer",
+                          "description": "Загальна кількість сторінок"
+                        },
+                        "hasPreviousPage": {
+                          "type": "boolean",
+                          "description": "Чи є попередня сторінка"
+                        },
+                        "hasNextPage": {
+                          "type": "boolean",
+                          "description": "Чи є наступна сторінка"
                         }
                       }
                     }
@@ -452,7 +464,7 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
                 "type": "object",
                 "required": [
@@ -463,7 +475,9 @@
                 "properties": {
                   "name": {
                     "type": "string",
-                    "description": "Ім'я контакту"
+                    "description": "Ім'я контакту",
+                    "minLength": 3,
+                    "maxLength": 20
                   },
                   "email": {
                     "type": "string",
@@ -472,12 +486,19 @@
                   },
                   "phone": {
                     "type": "string",
-                    "description": "Номер телефону контакту"
+                    "description": "Номер телефону контакту",
+                    "minLength": 3,
+                    "maxLength": 20
                   },
                   "favorite": {
                     "type": "boolean",
                     "default": false,
                     "description": "Чи є контакт улюбленим"
+                  },
+                  "photo": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Фото контакту"
                   }
                 }
               }
@@ -490,7 +511,20 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Contact"
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "example": 201
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Successfully created a contact!"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Contact"
+                    }
+                  }
                 }
               }
             }
@@ -518,7 +552,7 @@
         }
       }
     },
-    "/api/contacts/{contactId}": {
+    "/contacts/{contactId}": {
       "parameters": [
         {
           "in": "path",
@@ -547,7 +581,20 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Contact"
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Successfully found contact with id {contactId}!"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Contact"
+                    }
+                  }
                 }
               }
             }
@@ -588,22 +635,31 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
                 "type": "object",
                 "properties": {
                   "name": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 20
                   },
                   "email": {
                     "type": "string",
                     "format": "email"
                   },
                   "phone": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 20
                   },
                   "favorite": {
                     "type": "boolean"
+                  },
+                  "photo": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Фото контакту"
                   }
                 }
               }
@@ -616,7 +672,20 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Contact"
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Successfully patched a contact!"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Contact"
+                    }
+                  }
                 }
               }
             }

@@ -23,8 +23,6 @@ interface MongooseValidationError extends Error {
 }
 
 export const handeSaveError = (error: CallbackError, doc: Document, next: (err?: any) => void): void => {
-  console.error('MongoDB error:', error);
-
   const mongoError = error as MongoServerError;
   if (mongoError.name === 'MongoServerError' && mongoError.code === 11000) {
     const field = Object.keys(mongoError.keyValue || {})[0];

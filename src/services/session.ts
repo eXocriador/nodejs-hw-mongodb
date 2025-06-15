@@ -1,7 +1,7 @@
-import Session, { ISession } from '../db/models/session.ts';
-import { IUser } from '../types/models.ts';
+import Session, { ISession } from '../db/models/session';
+import { IUser } from '../types/models';
 import jwt from 'jsonwebtoken';
-import { getEnvVar } from '../utils/getEnvVar.ts';
+import { getEnvVar } from '../utils/getEnvVar';
 import createHttpError from 'http-errors';
 import { Response } from 'express';
 
@@ -15,13 +15,13 @@ interface Tokens {
 export const generateAuthTokens = (user: IUser): Tokens => {
   const payload = { id: user._id };
   const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: '15m' });
-  const refreshToken = jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
+  const refreshToken = jwt.sign(payload, JWT_SECRET, { expiresIn: '30d' });
   return { accessToken, refreshToken };
 };
 
 export const createSession = async (user: IUser, accessToken: string, refreshToken: string): Promise<ISession> => {
   const accessTokenValidUntil = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes from now
-  const refreshTokenValidUntil = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days from now
+  const refreshTokenValidUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days from now
 
   // Remove any existing sessions for the user to ensure only one active session
   await Session.deleteMany({ userId: user._id });
@@ -51,7 +51,13 @@ export const findSessionByRefreshToken = async (refreshToken: string): Promise<I
   return session;
 };
 
-export const setupSession = (res: Response, session: ISession): void => {
+export const setupSession = async (
+  user: IUser,
+  accessToken: string,
+  refreshToken: string,
+  res: Response,
+): Promise<void> => {
+  const session = await createSession(user, accessToken, refreshToken);
   res.cookie('refreshToken', session.refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',

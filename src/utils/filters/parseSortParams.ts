@@ -1,4 +1,4 @@
-import { SORT_ORDER } from '../../constants/contacts.ts';
+import { SORT_ORDER } from '../../constants/contacts';
 
 type SortOrder = typeof SORT_ORDER[keyof typeof SORT_ORDER];
 

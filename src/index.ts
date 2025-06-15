@@ -1,9 +1,9 @@
 import 'dotenv/config';
 
-import { initMongoConnection } from "./db/initMongoConnection.ts";
-import { createDirIfNotExists } from './utils/createDirIfNotExists.ts';
-import { TEMP_UPLOAD_DIR, UPLOAD_DIR } from './constants/index.ts';
-import { serverSetup } from "./server.ts";
+import { initMongoConnection } from "./db/initMongoConnection";
+import { createDirIfNotExists } from './utils/createDirIfNotExists';
+import { TEMP_UPLOAD_DIR, UPLOAD_DIR } from './constants/index';
+import { serverSetup } from "./server";
 
 const bootstrap = async (): Promise<void> => {
     try {

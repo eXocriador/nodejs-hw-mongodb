@@ -19,7 +19,16 @@ get:
       content:
         application/json:
           schema:
-            $ref: '../../components/schemas/Contact.yaml'
+            type: object
+            properties:
+              status:
+                type: integer
+                example: 200
+              message:
+                type: string
+                example: "Successfully found contact with id {contactId}!"
+              data:
+                $ref: '../../components/schemas/Contact.yaml'
     '404':
       description: Контакт не знайдено
       content:
@@ -43,26 +52,43 @@ patch:
   requestBody:
     required: true
     content:
-      application/json:
+      multipart/form-data:
         schema:
           type: object
           properties:
             name:
               type: string
+              minLength: 3
+              maxLength: 20
             email:
               type: string
               format: email
             phone:
               type: string
+              minLength: 3
+              maxLength: 20
             favorite:
               type: boolean
+            photo:
+              type: string
+              format: binary
+              description: Фото контакту
   responses:
     '200':
       description: Контакт оновлено
       content:
         application/json:
           schema:
-            $ref: '../../components/schemas/Contact.yaml'
+            type: object
+            properties:
+              status:
+                type: integer
+                example: 200
+              message:
+                type: string
+                example: "Successfully patched a contact!"
+              data:
+                $ref: '../../components/schemas/Contact.yaml'
     '400':
       description: Невалідні дані
       content:

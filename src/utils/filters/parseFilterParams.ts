@@ -1,4 +1,4 @@
-import { typeList } from '../../constants/contacts.ts';
+import { typeList } from '../../constants/contacts';
 
 interface Query {
   contactType?: string;

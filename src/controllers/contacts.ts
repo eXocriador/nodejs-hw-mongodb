@@ -1,9 +1,12 @@
 import { Response, NextFunction } from 'express';
-import { IUser } from '../types/models.ts';
-import { CustomRequest } from '../types/index.ts';
-import { getPaginationParams, formatContactResponse } from '../services/contacts.ts';
-import { Contacts } from '../db/models/contact.ts';
-import { uploadImage, deleteImage } from '../services/cloudinary.ts';
+import { IUser } from '../types/models';
+import { CustomRequest } from '../types/index';
+import { getPaginationParams, formatContactResponse } from '../services/contacts';
+import { Contacts } from '../db/models/contact';
+import { uploadImage, deleteImage } from '../services/cloudinary';
+import createHttpError from 'http-errors';
+import { parseSortParams } from '../utils/filters/parseSortParams';
+import { parseFilterParams } from '../utils/filters/parseFilterParams';
 
 export const getContacts = async (
   req: CustomRequest,
@@ -11,11 +14,20 @@ export const getContacts = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { page, limit, skip, favorite } = getPaginationParams(req.query);
-    const query = { owner: req.user?.id, ...(favorite && { favorite }) };
+    const { page, limit, skip } = getPaginationParams(req.query);
+    const { sortBy, sortOrder } = parseSortParams(req.query);
+    const filters = parseFilterParams(req.query);
+
+    const query = {
+      owner: req.user?.id,
+      ...filters
+    };
 
     const [contacts, total] = await Promise.all([
-      Contacts.find(query).skip(skip).limit(limit),
+      Contacts.find(query)
+        .sort({ [sortBy]: sortOrder })
+        .skip(skip)
+        .limit(limit),
       Contacts.countDocuments(query),
     ]);
 
@@ -23,14 +35,18 @@ export const getContacts = async (
     const hasNextPage = page < totalPages;
     const hasPrevPage = page > 1;
 
-    res.json({
-      contacts: contacts.map(formatContactResponse),
-      page,
-      limit,
-      total,
-      pages: totalPages,
-      nextPage: hasNextPage ? page + 1 : null,
-      prevPage: hasPrevPage ? page - 1 : null,
+    res.status(200).json({
+      status: 200,
+      message: 'Successfully found contacts!',
+      data: {
+        data: contacts.map(formatContactResponse),
+        page: page,
+        perPage: limit,
+        totalItems: total,
+        totalPages: totalPages,
+        hasPreviousPage: hasPrevPage,
+        hasNextPage: hasNextPage,
+      },
     });
   } catch (error) {
     next(error);
@@ -50,11 +66,14 @@ export const getContactById = async (
     });
 
     if (!contact) {
-      res.status(404).json({ message: 'Contact not found' });
-      return;
+      throw createHttpError(404, 'Contact not found');
     }
 
-    res.json(formatContactResponse(contact));
+    res.status(200).json({
+      status: 200,
+      message: `Successfully found contact with id ${contactId}!`,
+      data: formatContactResponse(contact),
+    });
   } catch (error) {
     next(error);
   }
@@ -79,7 +98,11 @@ export const createContact = async (
       owner: user._id,
     });
 
-    res.status(201).json(formatContactResponse(contact));
+    res.status(201).json({
+      status: 201,
+      message: 'Successfully created a contact!',
+      data: formatContactResponse(contact),
+    });
   } catch (error) {
     next(error);
   }
@@ -97,8 +120,7 @@ export const updateContact = async (
 
     const contact = await Contacts.findOne({ _id: contactId, owner: user._id });
     if (!contact) {
-      res.status(404).json({ message: 'Contact not found' });
-      return;
+      throw createHttpError(404, 'Contact not found');
     }
 
     if (req.file) {
@@ -116,11 +138,14 @@ export const updateContact = async (
     );
 
     if (!updatedContact) {
-      res.status(404).json({ message: 'Contact not found' });
-      return;
+      throw createHttpError(404, 'Contact not found');
     }
 
-    res.json(formatContactResponse(updatedContact));
+    res.status(200).json({
+      status: 200,
+      message: 'Successfully patched a contact!',
+      data: formatContactResponse(updatedContact),
+    });
   } catch (error) {
     next(error);
   }
@@ -138,8 +163,7 @@ export const deleteContact = async (
     });
 
     if (!contact) {
-      res.status(404).json({ message: 'Contact not found' });
-      return;
+      throw createHttpError(404, 'Contact not found');
     }
 
     if (contact.photo?.public_id) {
@@ -148,39 +172,6 @@ export const deleteContact = async (
 
     await Contacts.findByIdAndDelete(contact._id);
     res.status(204).send();
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const updateStatusContact = async (
-  req: CustomRequest,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const { contactId } = req.params;
-    const user = req.user as IUser;
-    const { favorite } = req.body;
-
-    const contact = await Contacts.findOne({ _id: contactId, owner: user._id });
-    if (!contact) {
-      res.status(404).json({ message: 'Contact not found' });
-      return;
-    }
-
-    const updatedContact = await Contacts.findByIdAndUpdate(
-      contactId,
-      { favorite },
-      { new: true }
-    );
-
-    if (!updatedContact) {
-      res.status(404).json({ message: 'Contact not found' });
-      return;
-    }
-
-    res.json(formatContactResponse(updatedContact));
   } catch (error) {
     next(error);
   }

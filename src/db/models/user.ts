@@ -1,6 +1,6 @@
 import { model, Schema } from 'mongoose';
-import { handeSaveError, setUpdateSettings } from './hooks.ts';
-import { IUser } from '../../types/models.ts'; // Імпортуємо IUser з types/models.ts
+import { handeSaveError, setUpdateSettings } from './hooks';
+import { IUser } from '../../types/models';
 
 const userSchema = new Schema<IUser>(
   {
