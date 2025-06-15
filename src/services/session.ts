@@ -61,7 +61,9 @@ export const setupSession = async (
   res.cookie('refreshToken', session.refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     expires: session.refreshTokenValidUntil,
+    path: '/',
+    domain: process.env.NODE_ENV === 'production' ? '.exocriador.art' : undefined
   });
 };

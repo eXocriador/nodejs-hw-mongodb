@@ -81,8 +81,10 @@ export const login = ctrlWrapper(async (
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    path: '/',
+    domain: process.env.NODE_ENV === 'production' ? '.exocriador.art' : undefined
   });
 
   res.json({
@@ -149,8 +151,10 @@ export const refresh = ctrlWrapper(async (
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    path: '/',
+    domain: process.env.NODE_ENV === 'production' ? '.exocriador.art' : undefined
   });
 
   res.json({
