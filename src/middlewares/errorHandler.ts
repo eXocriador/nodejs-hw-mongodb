@@ -20,12 +20,14 @@ export const errorHandler = (
     stack: isDevelopment ? err.stack : undefined,
     path: req.path,
     method: req.method,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    ip: req.ip,
+    userAgent: req.get('user-agent')
   });
 
   // Send response
   res.status(status).json({
-    message,
+    message: isDevelopment ? message : 'Something went wrong',
     ...(isDevelopment && { stack: err.stack })
   });
 };
