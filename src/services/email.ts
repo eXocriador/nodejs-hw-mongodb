@@ -10,7 +10,7 @@ const SMTP_PASSWORD = getEnvVar('SMTP_PASSWORD');
 const SMTP_FROM = getEnvVar('SMTP_FROM', SMTP_USER);
 
 const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000; // 1 second
+const RETRY_DELAY = 1000;
 
 const transporter = nodemailer.createTransport({
   host: SMTP_HOST,
@@ -27,19 +27,8 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 export const sendEmail = async (options: EmailOptions): Promise<void> => {
   let lastError: Error | null = null;
 
-  console.log('Attempting to send email with configuration:', {
-    host: SMTP_HOST,
-    port: SMTP_PORT,
-    user: SMTP_USER,
-    from: SMTP_FROM,
-    to: options.to,
-    subject: options.subject
-  });
-
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
-      console.log(`Attempt ${attempt} of ${MAX_RETRIES} to send email...`);
-
       const info = await transporter.sendMail({
         from: SMTP_FROM,
         to: options.to,
@@ -47,22 +36,17 @@ export const sendEmail = async (options: EmailOptions): Promise<void> => {
         html: options.html,
       });
 
-      console.log('Email sent successfully:', info);
-      return; // Success, exit the function
+      return;
     } catch (error) {
       lastError = error as Error;
-      console.error(`Attempt ${attempt} failed:`, error);
 
       if (attempt < MAX_RETRIES) {
-        console.log(`Waiting ${RETRY_DELAY * attempt}ms before next attempt...`);
-        await sleep(RETRY_DELAY * attempt); // Exponential backoff
+        await sleep(RETRY_DELAY * attempt);
         continue;
       }
     }
   }
 
-  // If we get here, all retries failed
-  console.error('All email sending attempts failed:', lastError);
   throw createHttpError(500, {
     message: 'Failed to send the email after multiple attempts.',
     cause: lastError
