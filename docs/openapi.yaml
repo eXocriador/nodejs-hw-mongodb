@@ -16,22 +16,22 @@ tags:
 servers:
   - url: http://localhost:3000
     description: Local development server
-  - url: https://your-app.onrender.com
+  - url: https://contacts-app-backend.onrender.com
     description: Production server
 paths:
-  /api/auth/register:
+  /auth/register:
     $ref: './swagger/paths/auth/register.yaml'
-  /api/auth/login:
+  /auth/login:
     $ref: './swagger/paths/auth/login.yaml'
-  /api/auth/google:
+  /auth/google:
     $ref: './swagger/paths/auth/google.yaml'
-  /api/auth/refresh:
+  /auth/refresh:
     $ref: './swagger/paths/auth/refresh.yaml'
-  /api/auth/logout:
+  /auth/logout:
     $ref: './swagger/paths/auth/logout.yaml'
-  /api/contacts:
+  /contacts:
     $ref: './swagger/paths/contacts/index.yaml'
-  /api/contacts/{contactId}:
+  /contacts/{contactId}:
     $ref: './swagger/paths/contacts/{id}.yaml'
 components:
   securitySchemes:

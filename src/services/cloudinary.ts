@@ -1,6 +1,6 @@
 import { v2 as cloudinary } from 'cloudinary';
-import { getEnvVar } from '../utils/getEnvVar.ts';
-import { CloudinaryResponse } from '../types/models.ts';
+import { getEnvVar } from '../utils/getEnvVar';
+import { CloudinaryResponse } from '../types/models';
 import { Express } from 'express';
 
 cloudinary.config({

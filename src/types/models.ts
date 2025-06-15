@@ -1,5 +1,5 @@
 import { Document } from 'mongoose';
-import { ContactType } from '../constants/contacts.ts';
+import { ContactType } from '../constants/contacts';
 
 export interface IUser extends Document {
   name: string;
@@ -106,4 +106,11 @@ export interface LoginWithGoogleOAuthRequest {
   state?: string;
   error?: string;
   error_description?: string;
+}
+
+export interface UpdateProfileRequest {
+  name?: string;
+  email?: string;
+  currentPassword?: string;
+  newPassword?: string;
 }

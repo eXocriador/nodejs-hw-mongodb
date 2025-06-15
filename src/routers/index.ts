@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import welcomeRoute from './welcomeRoute.ts';
-import contactsRouter from './contacts.ts';
-import authRouter from './auth.ts';
-import healthRouter from './health.ts';
+import welcomeRoute from './welcomeRoute';
+import contactsRouter from './contacts';
+import authRouter from './auth';
+import healthRouter from './health';
 
 const router = Router();
 
