@@ -11,10 +11,11 @@ const contactSchema = new Schema<IContact>(
     },
     email: {
       type: String,
+      required: [true, 'Email is required'],
     },
-    phone: {
+    phoneNumber: {
       type: String,
-      required: [true, 'Phone is required'],
+      required: [true, 'Phone number is required'],
     },
     favorite: {
       type: Boolean,
@@ -26,12 +27,7 @@ const contactSchema = new Schema<IContact>(
       required: true,
     },
     photo: {
-      secure_url: {
-        type: String,
-      },
-      public_id: {
-        type: String,
-      },
+      type: String,
     },
     contactType: {
       type: String,

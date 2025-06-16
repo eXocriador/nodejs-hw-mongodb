@@ -2,7 +2,7 @@ type: object
 required:
   - name
   - email
-  - phone
+  - phoneNumber
   - owner
 properties:
   _id:
@@ -15,7 +15,7 @@ properties:
     type: string
     format: email
     description: Email контакту
-  phone:
+  phoneNumber:
     type: string
     description: Номер телефону контакту
   favorite:

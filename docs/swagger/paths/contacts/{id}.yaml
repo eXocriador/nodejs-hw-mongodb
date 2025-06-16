@@ -52,7 +52,7 @@ patch:
   requestBody:
     required: true
     content:
-      multipart/form-data:
+      application/json:
         schema:
           type: object
           properties:
@@ -63,16 +63,12 @@ patch:
             email:
               type: string
               format: email
-            phone:
+            phoneNumber:
               type: string
               minLength: 3
               maxLength: 20
             favorite:
               type: boolean
-            photo:
-              type: string
-              format: binary
-              description: Фото контакту
   responses:
     '200':
       description: Контакт оновлено

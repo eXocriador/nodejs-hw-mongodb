@@ -1,5 +1,4 @@
 import { Document } from 'mongoose';
-import { ContactType } from '../constants/contacts';
 
 export interface IUser extends Document {
   name: string;
@@ -24,14 +23,11 @@ export interface ISession extends Document {
 export interface IContact extends Document {
   name: string;
   email: string;
-  phone: string;
+  phoneNumber: string;
   favorite: boolean;
   owner: IUser['_id'];
-  photo?: {
-    secure_url: string;
-    public_id: string;
-  };
-  contactType: ContactType;
+  photo?: string;
+  contactType: boolean | 'personal';
 }
 
 export interface AuthRequest {
@@ -43,25 +39,15 @@ export interface AuthRequest {
 export interface ContactRequest {
   name: string;
   email: string;
-  phone: string;
+  phoneNumber: string;
   favorite?: boolean;
-  photo?: {
-    secure_url: string;
-    public_id: string;
-  };
-  contactType?: ContactType;
 }
 
 export interface UpdateContactRequest {
   name?: string;
   email?: string;
-  phone?: string;
+  phoneNumber?: string;
   favorite?: boolean;
-  photo?: {
-    secure_url: string;
-    public_id: string;
-  };
-  contactType?: ContactType;
 }
 
 export interface PaginationQuery {
@@ -94,11 +80,9 @@ export interface ContactResponse {
   id: IContact['_id'];
   name: string;
   email: string;
-  phone: string;
+  phoneNumber: string;
   favorite: boolean;
   owner: IContact['owner'];
-  photo?: string;
-  contactType: ContactType;
 }
 
 export interface LoginWithGoogleOAuthRequest {

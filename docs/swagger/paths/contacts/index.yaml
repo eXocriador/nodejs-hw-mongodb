@@ -2,7 +2,7 @@ get:
   tags:
     - Contacts
   summary: Отримати список контактів
-  description: Повертає список контактів користувача з можливістю пагінації та фільтрації
+  description: Повертає список контактів користувача з можливістю пагінації, фільтрації та сортування.
   security:
     - bearerAuth: []
   parameters:
@@ -22,7 +22,21 @@ get:
       name: favorite
       schema:
         type: boolean
-      description: Фільтр за улюбленими контактами
+      description: Фільтр за улюбленими контактами (true/false)
+    - in: query
+      name: sortBy
+      schema:
+        type: string
+        enum: ['_id', 'name', 'email', 'phoneNumber', 'favorite', 'createdAt']
+        default: 'createdAt'
+      description: Поле для сортування
+    - in: query
+      name: sortOrder
+      schema:
+        type: string
+        enum: ['asc', 'desc']
+        default: 'asc'
+      description: Порядок сортування
   responses:
     '200':
       description: Список контактів
@@ -79,13 +93,13 @@ post:
   requestBody:
     required: true
     content:
-      multipart/form-data:
+      application/json:
         schema:
           type: object
           required:
             - name
             - email
-            - phone
+            - phoneNumber
           properties:
             name:
               type: string
@@ -96,7 +110,7 @@ post:
               type: string
               format: email
               description: Email контакту
-            phone:
+            phoneNumber:
               type: string
               description: Номер телефону контакту
               minLength: 3
@@ -105,10 +119,6 @@ post:
               type: boolean
               default: false
               description: Чи є контакт улюбленим
-            photo:
-              type: string
-              format: binary
-              description: Фото контакту
   responses:
     '201':
       description: Контакт створено

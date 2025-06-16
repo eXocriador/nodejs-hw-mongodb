@@ -17,9 +17,7 @@ export const formatContactResponse = (contact: IContact): ContactResponse => ({
   id: contact._id,
   name: contact.name,
   email: contact.email,
-  phone: contact.phone,
+  phoneNumber: contact.phoneNumber,
   favorite: contact.favorite,
   owner: contact.owner,
-  photo: contact.photo?.secure_url,
-  contactType: contact.contactType,
 });

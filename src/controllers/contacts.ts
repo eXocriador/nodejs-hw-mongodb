@@ -3,7 +3,6 @@ import { IUser } from '../types/models';
 import { CustomRequest } from '../types/index';
 import { getPaginationParams, formatContactResponse } from '../services/contacts';
 import { Contacts } from '../db/models/contact';
-import { uploadImage, deleteImage } from '../services/cloudinary';
 import createHttpError from 'http-errors';
 import { parseSortParams } from '../utils/filters/parseSortParams';
 import { parseFilterParams } from '../utils/filters/parseFilterParams';
@@ -86,15 +85,9 @@ export const createContact = async (
 ): Promise<void> => {
   try {
     const user = req.user as IUser;
-    const contactData = req.body;
-
-    if (req.file) {
-      const photoData = await uploadImage(req.file);
-      contactData.photo = photoData;
-    }
 
     const contact = await Contacts.create({
-      ...contactData,
+      ...req.body,
       owner: user._id,
     });
 
@@ -116,25 +109,11 @@ export const updateContact = async (
   try {
     const { contactId } = req.params;
     const user = req.user as IUser;
-    const updateData = req.body;
 
-    const contact = await Contacts.findOne({ _id: contactId, owner: user._id });
-    if (!contact) {
-      throw createHttpError(404, 'Contact not found');
-    }
-
-    if (req.file) {
-      if (contact.photo?.public_id) {
-        await deleteImage(contact.photo.public_id);
-      }
-      const photoData = await uploadImage(req.file);
-      updateData.photo = photoData;
-    }
-
-    const updatedContact = await Contacts.findByIdAndUpdate(
-      contactId,
-      updateData,
-      { new: true }
+    const updatedContact = await Contacts.findOneAndUpdate(
+      { _id: contactId, owner: user._id },
+      req.body,
+      { new: true, runValidators: true }
     );
 
     if (!updatedContact) {
@@ -157,7 +136,7 @@ export const deleteContact = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const contact = await Contacts.findOne({
+    const contact = await Contacts.findOneAndDelete({
       _id: req.params.contactId,
       owner: req.user?.id,
     });
@@ -166,11 +145,6 @@ export const deleteContact = async (
       throw createHttpError(404, 'Contact not found');
     }
 
-    if (contact.photo?.public_id) {
-      await deleteImage(contact.photo.public_id);
-    }
-
-    await Contacts.findByIdAndDelete(contact._id);
     res.status(204).send();
   } catch (error) {
     next(error);

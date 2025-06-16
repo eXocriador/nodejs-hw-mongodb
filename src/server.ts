@@ -24,28 +24,20 @@ const PORT: number = Number(getEnvVar('PORT', '3000'));
 
 export const serverSetup = (): Express => {
   const app: Express = express();
-
   app.use(helmetConfig);
   app.use(cors(corsOptions));
   app.use(rateLimiter);
   app.use(requestSizeLimiter);
   app.use(securityHeaders);
-
   app.use(compression() as RequestHandler);
-
   app.use(express.json({ limit: '10kb' }));
   app.use(express.urlencoded({ extended: true, limit: '10kb' }));
   app.use(cookieParser());
-
   app.use(logger);
   app.use(router);
-
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-
   app.use(notFoundHandler);
   app.use(errorHandler);
-
   app.listen(PORT, startLogs);
-
   return app;
 };
