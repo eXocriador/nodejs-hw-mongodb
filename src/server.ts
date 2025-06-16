@@ -39,7 +39,9 @@ export const serverSetup = (): Express => {
   app.use(cookieParser());
   app.use(logger);
   app.use(router);
-  app.use('/api-docs', express.static(docsPath));  app.use(notFoundHandler);
+  app.get('/api-docs', (req, res) => {
+    res.sendFile(path.join(process.cwd(), 'docs', 'api.html'));
+  });
   app.use(errorHandler);
   app.listen(PORT, startLogs);
   return app;

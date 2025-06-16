@@ -10,9 +10,9 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "dev": "nodemon",
+    "dev": "nodemon --exec \"node --max-old-space-size=4096 -r ts-node/register ./src/index.ts\"",
     "build": "tsc && yarn build-docs",
-    "build-docs": "redocly bundle docs/openapi.yaml --ext json -o docs/swagger.json",
+    "build-docs": "redocly build-docs docs/openapi.yaml -o docs/api.html",
     "start": "node dist/index.js",
     "start:prod": "NODE_ENV=production node dist/index.js",
     "preview-docs": "redocly preview-docs"
