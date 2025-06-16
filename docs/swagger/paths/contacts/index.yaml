@@ -88,6 +88,11 @@ get:
         application/json:
           schema:
             $ref: '../../components/schemas/Error.yaml'
+          example:
+            status: 401
+            message: "Authentication required"
+            data: null
+
 
 post:
   tags:
@@ -152,9 +157,18 @@ post:
         application/json:
           schema:
             $ref: '../../components/schemas/Error.yaml'
+          example:
+            status: 400
+            message: "Validation failed: 'name' is required"
+            data: null
     '401':
       description: Не авторизований
       content:
         application/json:
           schema:
             $ref: '../../components/schemas/Error.yaml'
+          example:
+            status: 401
+            message: "Authentication required"
+            data: null
+

@@ -183,6 +183,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": 400,
+                  "message": "Validation failed: 'email' must be a valid email",
+                  "data": null
                 }
               }
             }
@@ -193,6 +198,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": 401,
+                  "message": "Email or password is wrong",
+                  "data": null
                 }
               }
             }
@@ -277,6 +287,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": 401,
+                  "message": "Invalid Google token",
+                  "data": null
                 }
               }
             }
@@ -316,6 +331,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": 401,
+                  "message": "Refresh token expired.",
+                  "data": null
                 }
               }
             }
@@ -345,6 +365,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": 401,
+                  "message": "Authentication required",
+                  "data": null
                 }
               }
             }
@@ -497,6 +522,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": 401,
+                  "message": "Authentication required",
+                  "data": null
                 }
               }
             }
@@ -593,6 +623,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": 400,
+                  "message": "Validation failed: 'name' is required",
+                  "data": null
                 }
               }
             }
@@ -603,6 +638,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": 401,
+                  "message": "Authentication required",
+                  "data": null
                 }
               }
             }
@@ -663,6 +703,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": 401,
+                  "message": "Authentication required",
+                  "data": null
                 }
               }
             }
@@ -673,6 +718,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": 404,
+                  "message": "Contact not found",
+                  "data": null
                 }
               }
             }
@@ -749,7 +799,8 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
-                }
+                },
+                "example": null
               }
             }
           },
@@ -759,6 +810,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": 401,
+                  "message": "Authentication required",
+                  "data": null
                 }
               }
             }
@@ -796,6 +852,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": 401,
+                  "message": "Authentication required",
+                  "data": null
                 }
               }
             }
@@ -806,6 +867,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": 404,
+                  "message": "Contact not found",
+                  "data": null
                 }
               }
             }

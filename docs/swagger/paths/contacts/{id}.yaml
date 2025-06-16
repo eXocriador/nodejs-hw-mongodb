@@ -35,12 +35,20 @@ get:
         application/json:
           schema:
             $ref: '../../components/schemas/Error.yaml'
+          example:
+            status: 404
+            message: "Contact not found"
+            data: null
     '401':
       description: Не авторизований
       content:
         application/json:
           schema:
             $ref: '../../components/schemas/Error.yaml'
+          example:
+            status: 401
+            message: "Authentication required"
+            data: null
 
 patch:
   tags:
@@ -91,6 +99,7 @@ patch:
         application/json:
           schema:
             $ref: '../../components/schemas/Error.yaml'
+          example:
     '404':
       description: Контакт не знайдено
       content:
@@ -103,6 +112,10 @@ patch:
         application/json:
           schema:
             $ref: '../../components/schemas/Error.yaml'
+          example:
+            status: 401
+            message: "Authentication required"
+            data: null
 
 delete:
   tags:
@@ -120,9 +133,17 @@ delete:
         application/json:
           schema:
             $ref: '../../components/schemas/Error.yaml'
+          example:
+            status: 404
+            message: "Contact not found"
+            data: null
     '401':
       description: Не авторизований
       content:
         application/json:
           schema:
             $ref: '../../components/schemas/Error.yaml'
+          example:
+            status: 401
+            message: "Authentication required"
+            data: null

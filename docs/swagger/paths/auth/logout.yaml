@@ -14,3 +14,7 @@ post:
         application/json:
           schema:
             $ref: '../../components/schemas/Error.yaml'
+          example:
+            status: 401
+            message: "Authentication required"
+            data: null

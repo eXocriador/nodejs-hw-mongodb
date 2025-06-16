@@ -21,3 +21,8 @@ post:
         application/json:
           schema:
             $ref: '../../components/schemas/Error.yaml'
+          example:
+            status: 401
+            message: "Refresh token expired."
+            data: null
+

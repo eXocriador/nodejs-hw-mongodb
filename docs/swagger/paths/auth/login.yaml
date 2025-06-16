@@ -39,9 +39,17 @@ post:
         application/json:
           schema:
             $ref: '../../components/schemas/Error.yaml'
+          example:
+            status: 401
+            message: "Email or password is wrong"
+            data: null
     '400':
       description: Невалідні дані
       content:
         application/json:
           schema:
             $ref: '../../components/schemas/Error.yaml'
+          example:
+            status: 400
+            message: "Validation failed: 'email' must be a valid email"
+            data: null
