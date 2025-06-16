@@ -1,37 +1,42 @@
 import { Response, NextFunction } from 'express';
 import { IUser } from '../types/models';
 import { CustomRequest } from '../types/index';
-import { getPaginationParams, formatContactResponse } from '../services/contacts';
+import { formatContactResponse } from '../services/contacts';
 import { Contacts } from '../db/models/contact';
 import createHttpError from 'http-errors';
 import { uploadImage } from '../services/cloudinary';
 import { parseSortParams } from '../utils/filters/parseSortParams';
 import { parseFilterParams } from '../utils/filters/parseFilterParams';
 
+import { parsePaginationParams } from '../utils/filters/parsePaginationParams';
+
 export const getContacts = async (
   req: CustomRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
-    const { page, limit, skip } = getPaginationParams(req.query);
+
+    const { page, perPage } = parsePaginationParams(req.query);
     const { sortBy, sortOrder } = parseSortParams(req.query);
     const filters = parseFilterParams(req.query);
 
+    const skip = (page - 1) * perPage;
+
     const query = {
       owner: req.user?.id,
-      ...filters
+      ...filters,
     };
 
     const [contacts, total] = await Promise.all([
       Contacts.find(query)
         .sort({ [sortBy]: sortOrder })
         .skip(skip)
-        .limit(limit),
+        .limit(perPage),
       Contacts.countDocuments(query),
     ]);
 
-    const totalPages = Math.ceil(total / limit);
+    const totalPages = Math.ceil(total / perPage);
     const hasNextPage = page < totalPages;
     const hasPrevPage = page > 1;
 
@@ -41,7 +46,7 @@ export const getContacts = async (
       data: {
         data: contacts.map(formatContactResponse),
         page: page,
-        perPage: limit,
+        perPage: perPage,
         totalItems: total,
         totalPages: totalPages,
         hasPreviousPage: hasPrevPage,
@@ -56,7 +61,7 @@ export const getContacts = async (
 export const getContactById = async (
   req: CustomRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const { contactId } = req.params;
@@ -82,7 +87,7 @@ export const getContactById = async (
 export const createContact = async (
   req: CustomRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const user = req.user as IUser;
@@ -112,7 +117,7 @@ export const createContact = async (
 export const updateContact = async (
   req: CustomRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const { contactId } = req.params;
@@ -128,9 +133,9 @@ export const updateContact = async (
       { _id: contactId, owner: user._id },
       {
         ...req.body,
-        ...(photoUrl && { photo: photoUrl })
+        ...(photoUrl && { photo: photoUrl }),
       },
-      { new: true, runValidators: true, upsert: true }
+      { new: true, runValidators: true, upsert: true },
     );
 
     if (!updatedContact) {
@@ -150,7 +155,7 @@ export const updateContact = async (
 export const deleteContact = async (
   req: CustomRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const contact = await Contacts.findOneAndDelete({

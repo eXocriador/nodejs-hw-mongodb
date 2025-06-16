@@ -93,18 +93,17 @@ get:
             message: "Authentication required"
             data: null
 
-
 post:
   tags:
     - Contacts
   summary: Створити контакт
-  description: Створює новий контакт
+  description: Створює новий контакт з можливістю завантаження фото.
   security:
     - bearerAuth: []
   requestBody:
     required: true
     content:
-      application/json:
+      multipart/form-data: # Змінено тип контенту
         schema:
           type: object
           required:
@@ -135,6 +134,10 @@ post:
               type: string
               enum: ['personal', 'work', 'other']
               description: Тип контакту
+            photo:
+              type: string
+              format: binary # Додано поле для завантаження файлу
+              description: Фотографія контакту
   responses:
     '201':
       description: Контакт створено
@@ -171,4 +174,3 @@ post:
             status: 401
             message: "Authentication required"
             data: null
-

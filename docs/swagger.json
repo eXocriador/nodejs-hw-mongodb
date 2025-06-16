@@ -538,7 +538,7 @@
           "Contacts"
         ],
         "summary": "Створити контакт",
-        "description": "Створює новий контакт",
+        "description": "Створює новий контакт з можливістю завантаження фото.",
         "security": [
           {
             "bearerAuth": []
@@ -547,7 +547,7 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
                 "type": "object",
                 "required": [
@@ -587,6 +587,11 @@
                       "other"
                     ],
                     "description": "Тип контакту"
+                  },
+                  "photo": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Фотографія контакту"
                   }
                 }
               }
@@ -734,7 +739,7 @@
           "Contacts"
         ],
         "summary": "Оновити контакт",
-        "description": "Оновлює існуючий контакт",
+        "description": "Оновлює існуючий контакт з можливістю завантаження нового фото.",
         "security": [
           {
             "bearerAuth": []
@@ -743,7 +748,7 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
                 "type": "object",
                 "properties": {
@@ -763,6 +768,19 @@
                   },
                   "isFavourite": {
                     "type": "boolean"
+                  },
+                  "contactType": {
+                    "type": "string",
+                    "enum": [
+                      "personal",
+                      "work",
+                      "other"
+                    ]
+                  },
+                  "photo": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Нова фотографія контакту"
                   }
                 }
               }
@@ -799,8 +817,7 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
-                },
-                "example": null
+                }
               }
             }
           },

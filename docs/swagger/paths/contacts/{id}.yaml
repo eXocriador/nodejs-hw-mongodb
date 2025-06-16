@@ -50,17 +50,19 @@ get:
             message: "Authentication required"
             data: null
 
+# docs/swagger/paths/contacts/{id}.yaml
+
 patch:
   tags:
     - Contacts
   summary: Оновити контакт
-  description: Оновлює існуючий контакт
+  description: Оновлює існуючий контакт з можливістю завантаження нового фото.
   security:
     - bearerAuth: []
   requestBody:
     required: true
     content:
-      application/json:
+      multipart/form-data: # Змінено тип контенту
         schema:
           type: object
           properties:
@@ -77,6 +79,13 @@ patch:
               maxLength: 20
             isFavourite:
               type: boolean
+            contactType: # Додано відсутнє поле
+              type: string
+              enum: ['personal', 'work', 'other']
+            photo:
+              type: string
+              format: binary # Додано поле для завантаження файлу
+              description: Нова фотографія контакту
   responses:
     '200':
       description: Контакт оновлено
@@ -99,7 +108,6 @@ patch:
         application/json:
           schema:
             $ref: '../../components/schemas/Error.yaml'
-          example:
     '404':
       description: Контакт не знайдено
       content:

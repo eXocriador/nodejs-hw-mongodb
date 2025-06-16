@@ -21,7 +21,7 @@ export interface SuccessResponse<T> {
 
 export interface PaginationParams {
   page?: number;
-  limit?: number;
+  perPage?: number;
   sort?: string;
   order?: 'asc' | 'desc';
 }
@@ -30,7 +30,8 @@ export interface PaginatedResponse<T> extends SuccessResponse<T> {
   pagination: {
     total: number;
     page: number;
-    limit: number;
+    perPage: number;
     pages: number;
   };
 }
+
