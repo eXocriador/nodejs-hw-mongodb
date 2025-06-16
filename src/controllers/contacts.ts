@@ -130,7 +130,7 @@ export const updateContact = async (
         ...req.body,
         ...(photoUrl && { photo: photoUrl })
       },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true, upsert: true }
     );
 
     if (!updatedContact) {
