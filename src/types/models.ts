@@ -97,7 +97,7 @@ export interface UpdateProfileRequest {
   name?: string;
   email?: string;
   currentPassword?: string;
-  newPassword?: string;
+  password?: string;
 }
 
 export interface ContactRequest {

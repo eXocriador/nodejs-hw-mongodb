@@ -40,17 +40,17 @@ export const loginWithGoogleOAuthSchema = Joi.object<LoginWithGoogleOAuthRequest
 export const updateProfileSchema = Joi.object<UpdateProfileRequest>({
   name: Joi.string().min(2).max(50).optional(),
   email: Joi.string().pattern(emailRegex).optional(),
-  currentPassword: Joi.string().required().when('newPassword', {
+  currentPassword: Joi.string().required().when('password', {
     is: Joi.exist(),
     then: Joi.required(),
     otherwise: Joi.forbidden(),
   }),
-  newPassword: passwordSchema.optional(),
+  password: passwordSchema.optional(),
 }).custom((obj, helpers) => {
-  if (obj.newPassword && !obj.currentPassword) {
+  if (obj.password && !obj.currentPassword) {
     return helpers.error('any.invalid', { message: 'Current password is required to set a new password' });
   }
-  if (!obj.name && !obj.email && !obj.newPassword) {
+  if (!obj.name && !obj.email && !obj.password) {
     return helpers.error('any.invalid', { message: 'At least one field must be provided' });
   }
   return obj;
