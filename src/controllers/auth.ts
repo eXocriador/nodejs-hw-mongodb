@@ -186,7 +186,7 @@ export const sendResetEmail = async (req: Request, res: Response, next: NextFunc
 
 export const handleResetPassword = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { token, newPassword } = req.body;
+    const { token, password } = req.body;
 
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
@@ -199,7 +199,7 @@ export const handleResetPassword = async (req: Request, res: Response, next: Nex
       throw createHttpError(400, 'Token is invalid or has expired');
     }
 
-    user.password = await hashPassword(newPassword);
+    user.password = await hashPassword(password);
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
     await user.save();
