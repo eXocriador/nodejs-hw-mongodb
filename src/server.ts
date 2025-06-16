@@ -1,3 +1,4 @@
+import path from 'node:path';
 import express, { Express, RequestHandler, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -19,8 +20,11 @@ import {
   securityHeaders
 } from './middlewares/security';
 
+
 dotenv.config();
 const PORT: number = Number(getEnvVar('PORT', '3000'));
+const docsPath = path.join(process.cwd(), 'docs');
+
 
 export const serverSetup = (): Express => {
   const app: Express = express();
@@ -35,8 +39,7 @@ export const serverSetup = (): Express => {
   app.use(cookieParser());
   app.use(logger);
   app.use(router);
-  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-  app.use(notFoundHandler);
+  app.use('/api-docs', express.static(docsPath));  app.use(notFoundHandler);
   app.use(errorHandler);
   app.listen(PORT, startLogs);
   return app;

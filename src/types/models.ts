@@ -99,3 +99,20 @@ export interface UpdateProfileRequest {
   currentPassword?: string;
   newPassword?: string;
 }
+
+export interface ContactRequest {
+  name: string;
+  email: string;
+  phoneNumber: string;
+  isFavourite?: boolean;
+  contactType: string;
+}
+
+
+export interface UpdateContactRequest {
+  name?: string;
+  email?: string;
+  phoneNumber?: string;
+  isFavourite?: boolean;
+  contactType?: string;
+}
