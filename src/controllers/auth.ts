@@ -54,7 +54,6 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
       status: 201,
       message: "Successfully registered a user!",
       data: {
-        user: user.toObject(),
         accessToken
       }
     });
@@ -89,7 +88,6 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
       status: 200,
       message: "Successfully logged in!",
       data: {
-        user: user.toObject(),
         accessToken
       }
     });
@@ -226,7 +224,6 @@ export const loginWithGoogleController = async (req: Request, res: Response, nex
       status: 200,
       message: 'Successfully logged in with Google',
       data: {
-        user: user.toObject(),
         accessToken
       }
     });
