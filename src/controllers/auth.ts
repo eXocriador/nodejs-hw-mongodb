@@ -1,29 +1,21 @@
 import { Request, Response, NextFunction } from 'express';
+import crypto from 'crypto';
+import fs from 'fs/promises';
+import path from 'path';
+import jwt from 'jsonwebtoken';
+import createHttpError from 'http-errors';
+
 import User from '../db/models/user';
 import Session from '../db/models/session';
-import {
-  hashPassword,
-  comparePassword,
-  generateToken,
-  verifyToken,
-  refreshTokens,
-  invalidateSession,
-  invalidateAllSessions,
-  loginOrSignupWithGoogle
-} from '../services/auth';
-import {
-  generateAuthTokens,
-  setupSession,
-  deleteSession,
-  findSessionByRefreshToken
-} from '../services/session';
-import createHttpError from 'http-errors';
-import { authSchema, loginSchema } from '../validation/auth';
 import { IUser } from '../types/models';
-import { generateAuthUrl } from '../utils/googleOAuth2';
+import { TEMPLATES_DIR } from '../constants';
+import { authSchema, loginSchema } from '../validation/auth';
+import { hashPassword, comparePassword } from '../services/auth';
+import { generateAuthTokens, setupSession, deleteSession, findSessionByRefreshToken } from '../services/session';
+import { generateAuthUrl, validateCode } from '../utils/googleOAuth2';
 import { sendEmail } from '../services/email';
-import jwt from 'jsonwebtoken';
 import { getEnvVar } from '../utils/getEnvVar';
+import { loginOrSignupWithGoogle } from '../services/auth';
 
 const JWT_SECRET = getEnvVar('JWT_SECRET');
 
@@ -52,10 +44,10 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
 
     res.status(201).json({
       status: 201,
-      message: "Successfully registered a user!",
+      message: 'Successfully registered a user!',
       data: {
-        accessToken
-      }
+        accessToken,
+      },
     });
   } catch (error) {
     next(error);
@@ -86,10 +78,10 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
     res.json({
       status: 200,
-      message: "Successfully logged in!",
+      message: 'Successfully logged in!',
       data: {
-        accessToken
-      }
+        accessToken,
+      },
     });
   } catch (error) {
     next(error);
@@ -117,7 +109,7 @@ export const getCurrentUser = async (req: AuthenticatedRequest, res: Response, n
     }
     res.json({
       status: 200,
-      data: user
+      data: user,
     });
   } catch (error) {
     next(error);
@@ -146,7 +138,7 @@ export const refresh = async (req: Request, res: Response, next: NextFunction) =
 
     res.json({
       status: 200,
-      data: { accessToken }
+      data: { accessToken },
     });
   } catch (error) {
     next(error);
@@ -158,19 +150,34 @@ export const sendResetEmail = async (req: Request, res: Response, next: NextFunc
     const { email } = req.body;
     const user = await User.findOne({ email });
     if (!user) {
-      throw createHttpError(404, 'User not found');
+      return res.json({
+        status: 200,
+        message: 'If an account with this email exists, a password reset email has been sent.',
+      });
     }
 
-    const { accessToken } = generateAuthTokens(user);
+    const resetToken = crypto.randomBytes(32).toString('hex');
+
+    user.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    user.passwordResetExpires = new Date(Date.now() + 3600000);
+    await user.save();
+
+    const resetUrl = `${getEnvVar('APP_DOMAIN', 'http://localhost:3000')}/reset-password?token=${resetToken}`;
+
+    const templatePath = path.join(TEMPLATES_DIR, 'reset-password-email.html');
+    let html = await fs.readFile(templatePath, 'utf-8');
+    html = html.replace(/{{link}}/g, resetUrl);
+    html = html.replace(/{{year}}/g, new Date().getFullYear().toString());
+
     await sendEmail({
       to: email,
-      subject: 'Password Reset',
-      html: `Click here to reset your password: ${accessToken}`
+      subject: 'Password Reset Request',
+      html,
     });
 
     res.json({
       status: 200,
-      message: 'Password reset email sent'
+      message: 'If an account with this email exists, a password reset email has been sent.',
     });
   } catch (error) {
     next(error);
@@ -180,20 +187,28 @@ export const sendResetEmail = async (req: Request, res: Response, next: NextFunc
 export const handleResetPassword = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { token, newPassword } = req.body;
-    const decoded = jwt.verify(token, JWT_SECRET) as { id: string };
-    const user = await User.findById(decoded.id);
+
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+    const user = await User.findOne({
+      passwordResetToken: hashedToken,
+      passwordResetExpires: { $gt: new Date() },
+    });
 
     if (!user) {
-      throw createHttpError(404, 'User not found');
+      throw createHttpError(400, 'Token is invalid or has expired');
     }
 
-    const hashedPassword = await hashPassword(newPassword);
-    await User.findByIdAndUpdate(user._id, { password: hashedPassword });
+    user.password = await hashPassword(newPassword);
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save();
+
     await Session.deleteMany({ userId: user._id });
 
     res.json({
       status: 200,
-      message: 'Password successfully reset'
+      message: 'Password has been successfully reset.',
     });
   } catch (error) {
     next(error);
@@ -205,7 +220,7 @@ export const getGoogleOAuthUrlController = async (req: Request, res: Response, n
     const url = generateAuthUrl();
     res.json({
       status: 200,
-      data: { url }
+      data: { url },
     });
   } catch (error) {
     next(error);
@@ -224,8 +239,8 @@ export const loginWithGoogleController = async (req: Request, res: Response, nex
       status: 200,
       message: 'Successfully logged in with Google',
       data: {
-        accessToken
-      }
+        accessToken,
+      },
     });
   } catch (error) {
     next(error);
@@ -251,7 +266,7 @@ export const updateProfileController = async (req: AuthenticatedRequest, res: Re
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { name, email },
-      { new: true }
+      { new: true },
     ).select('-password');
 
     if (!updatedUser) {
@@ -261,7 +276,7 @@ export const updateProfileController = async (req: AuthenticatedRequest, res: Re
     res.json({
       status: 200,
       message: 'Profile updated successfully',
-      data: updatedUser
+      data: updatedUser,
     });
   } catch (error) {
     next(error);
