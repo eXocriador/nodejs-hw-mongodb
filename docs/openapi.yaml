@@ -14,10 +14,11 @@ tags:
   - name: Contacts
     description: Операції з контактами
 servers:
-  - url: http://localhost:3000
-    description: Local development server
   - url: https://goit.exocriador.art
     description: Production server
+  - url: http://localhost:3000
+    description: Local development server
+
 paths:
   /auth/register:
     $ref: './swagger/paths/auth/register.yaml'
