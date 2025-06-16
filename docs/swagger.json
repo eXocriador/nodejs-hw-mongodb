@@ -11,12 +11,12 @@
   },
   "servers": [
     {
-      "url": "https://goit.exocriador.art",
-      "description": "Production server"
-    },
-    {
       "url": "http://localhost:3000",
       "description": "Local development server"
+    },
+    {
+      "url": "https://goit.exocriador.art",
+      "description": "Production server"
     }
   ],
   "tags": [
@@ -32,7 +32,9 @@
   "paths": {
     "/auth/register": {
       "post": {
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "summary": "Реєстрація користувача",
         "description": "Створює нового користувача",
         "requestBody": {
@@ -41,7 +43,11 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["name", "email", "password"],
+                "required": [
+                  "name",
+                  "email",
+                  "password"
+                ],
                 "properties": {
                   "name": {
                     "type": "string",
@@ -111,7 +117,9 @@
     },
     "/auth/login": {
       "post": {
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "summary": "Вхід в систему",
         "description": "Авторизує користувача та повертає токени",
         "requestBody": {
@@ -120,7 +128,10 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["email", "password"],
+                "required": [
+                  "email",
+                  "password"
+                ],
                 "properties": {
                   "email": {
                     "type": "string",
@@ -181,7 +192,9 @@
     },
     "/auth/google": {
       "get": {
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "summary": "Отримати URL для Google OAuth",
         "description": "Повертає URL для авторизації через Google OAuth",
         "operationId": "getGoogleAuthUrl",
@@ -205,7 +218,9 @@
         }
       },
       "post": {
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "summary": "Google OAuth авторизація",
         "description": "Авторизує користувача через Google OAuth",
         "requestBody": {
@@ -214,7 +229,9 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["token"],
+                "required": [
+                  "token"
+                ],
                 "properties": {
                   "token": {
                     "type": "string",
@@ -259,7 +276,9 @@
     },
     "/auth/refresh": {
       "post": {
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "summary": "Оновлення токену",
         "description": "Оновлює access token за допомогою refresh token",
         "responses": {
@@ -296,7 +315,9 @@
     },
     "/auth/logout": {
       "post": {
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "summary": "Вихід з системи",
         "description": "Видаляє сесію користувача",
         "security": [
@@ -323,7 +344,9 @@
     },
     "/contacts": {
       "get": {
-        "tags": ["Contacts"],
+        "tags": [
+          "Contacts"
+        ],
         "summary": "Отримати список контактів",
         "description": "Повертає список контактів користувача з можливістю пагінації, фільтрації та сортування.",
         "security": [
@@ -360,6 +383,19 @@
           },
           {
             "in": "query",
+            "name": "contactType",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "personal",
+                "work",
+                "other"
+              ]
+            },
+            "description": "Фільтр за типом контакту"
+          },
+          {
+            "in": "query",
             "name": "sortBy",
             "schema": {
               "type": "string",
@@ -380,7 +416,10 @@
             "name": "sortOrder",
             "schema": {
               "type": "string",
-              "enum": ["asc", "desc"],
+              "enum": [
+                "asc",
+                "desc"
+              ],
               "default": "asc"
             },
             "description": "Порядок сортування"
@@ -455,7 +494,9 @@
         }
       },
       "post": {
-        "tags": ["Contacts"],
+        "tags": [
+          "Contacts"
+        ],
         "summary": "Створити контакт",
         "description": "Створює новий контакт",
         "security": [
@@ -469,7 +510,12 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["name", "email", "phoneNumber"],
+                "required": [
+                  "name",
+                  "email",
+                  "phoneNumber",
+                  "contactType"
+                ],
                 "properties": {
                   "name": {
                     "type": "string",
@@ -492,6 +538,15 @@
                     "type": "boolean",
                     "default": false,
                     "description": "Чи є контакт улюбленим"
+                  },
+                  "contactType": {
+                    "type": "string",
+                    "enum": [
+                      "personal",
+                      "work",
+                      "other"
+                    ],
+                    "description": "Тип контакту"
                   }
                 }
               }
@@ -558,7 +613,9 @@
         }
       ],
       "get": {
-        "tags": ["Contacts"],
+        "tags": [
+          "Contacts"
+        ],
         "summary": "Отримати контакт за ID",
         "description": "Повертає контакт за його ID",
         "security": [
@@ -613,7 +670,9 @@
         }
       },
       "patch": {
-        "tags": ["Contacts"],
+        "tags": [
+          "Contacts"
+        ],
         "summary": "Оновити контакт",
         "description": "Оновлює існуючий контакт",
         "security": [
@@ -707,7 +766,9 @@
         }
       },
       "delete": {
-        "tags": ["Contacts"],
+        "tags": [
+          "Contacts"
+        ],
         "summary": "Видалити контакт",
         "description": "Видаляє контакт за його ID",
         "security": [
@@ -754,7 +815,13 @@
     "schemas": {
       "Contact": {
         "type": "object",
-        "required": ["name", "email", "phoneNumber", "owner"],
+        "required": [
+          "name",
+          "email",
+          "phoneNumber",
+          "owner",
+          "contactType"
+        ],
         "properties": {
           "_id": {
             "type": "string",
@@ -778,6 +845,19 @@
             "default": false,
             "description": "Чи є контакт улюбленим"
           },
+          "contactType": {
+            "type": "string",
+            "enum": [
+              "personal",
+              "work",
+              "other"
+            ],
+            "description": "Тип контакту"
+          },
+          "photo": {
+            "type": "string",
+            "description": "URL фотографії контакту"
+          },
           "owner": {
             "type": "string",
             "description": "ID власника контакту"
@@ -796,7 +876,11 @@
       },
       "User": {
         "type": "object",
-        "required": ["name", "email", "password"],
+        "required": [
+          "name",
+          "email",
+          "password"
+        ],
         "properties": {
           "_id": {
             "type": "string",
@@ -817,7 +901,11 @@
           },
           "subscription": {
             "type": "string",
-            "enum": ["starter", "pro", "business"],
+            "enum": [
+              "starter",
+              "pro",
+              "business"
+            ],
             "default": "starter",
             "description": "Тип підписки"
           },
@@ -847,7 +935,9 @@
       },
       "Error": {
         "type": "object",
-        "required": ["message"],
+        "required": [
+          "message"
+        ],
         "properties": {
           "message": {
             "type": "string",
@@ -865,7 +955,11 @@
       },
       "AuthResponse": {
         "type": "object",
-        "required": ["status", "message", "data"],
+        "required": [
+          "status",
+          "message",
+          "data"
+        ],
         "properties": {
           "status": {
             "type": "integer",
