@@ -19,7 +19,7 @@ get:
         default: 10
       description: Кількість контактів на сторінці
     - in: query
-      name: favorite
+      name: isFavourite
       schema:
         type: boolean
       description: Фільтр за улюбленими контактами (true/false)
@@ -27,7 +27,7 @@ get:
       name: sortBy
       schema:
         type: string
-        enum: ['_id', 'name', 'email', 'phoneNumber', 'favorite', 'createdAt']
+        enum: ['_id', 'name', 'email', 'phoneNumber', 'isFavourite', 'createdAt']
         default: 'createdAt'
       description: Поле для сортування
     - in: query
@@ -115,7 +115,7 @@ post:
               description: Номер телефону контакту
               minLength: 3
               maxLength: 20
-            favorite:
+            isFavourite:
               type: boolean
               default: false
               description: Чи є контакт улюбленим

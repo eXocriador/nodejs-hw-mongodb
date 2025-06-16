@@ -24,7 +24,7 @@ export interface IContact extends Document {
   name: string;
   email: string;
   phoneNumber: string;
-  favorite: boolean;
+  isFavourite: boolean;
   owner: IUser['_id'];
   photo?: string;
   contactType: boolean | 'personal';
@@ -40,20 +40,20 @@ export interface ContactRequest {
   name: string;
   email: string;
   phoneNumber: string;
-  favorite?: boolean;
+  isFavourite?: boolean;
 }
 
 export interface UpdateContactRequest {
   name?: string;
   email?: string;
   phoneNumber?: string;
-  favorite?: boolean;
+  isFavourite?: boolean;
 }
 
 export interface PaginationQuery {
   page?: string;
   limit?: string;
-  favorite?: string;
+  isFavourite?: string;
 }
 
 export interface RequestResetEmailRequest {
@@ -81,8 +81,9 @@ export interface ContactResponse {
   name: string;
   email: string;
   phoneNumber: string;
-  favorite: boolean;
+  isFavourite: boolean;
   owner: IContact['owner'];
+  photo?: string;
 }
 
 export interface LoginWithGoogleOAuthRequest {

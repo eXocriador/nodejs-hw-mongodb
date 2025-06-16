@@ -67,7 +67,7 @@ patch:
               type: string
               minLength: 3
               maxLength: 20
-            favorite:
+            isFavourite:
               type: boolean
   responses:
     '200':

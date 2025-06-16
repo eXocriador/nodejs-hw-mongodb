@@ -4,6 +4,7 @@ import { CustomRequest } from '../types/index';
 import { getPaginationParams, formatContactResponse } from '../services/contacts';
 import { Contacts } from '../db/models/contact';
 import createHttpError from 'http-errors';
+import { uploadImage } from '../services/cloudinary';
 import { parseSortParams } from '../utils/filters/parseSortParams';
 import { parseFilterParams } from '../utils/filters/parseFilterParams';
 
@@ -85,10 +86,17 @@ export const createContact = async (
 ): Promise<void> => {
   try {
     const user = req.user as IUser;
+    let photoUrl: string | undefined;
+
+    if (req.file) {
+      const result = await uploadImage(req.file);
+      photoUrl = result.secure_url;
+    }
 
     const contact = await Contacts.create({
       ...req.body,
       owner: user._id,
+      photo: photoUrl,
     });
 
     res.status(201).json({
@@ -109,10 +117,19 @@ export const updateContact = async (
   try {
     const { contactId } = req.params;
     const user = req.user as IUser;
+    let photoUrl: string | undefined;
+
+    if (req.file) {
+      const result = await uploadImage(req.file);
+      photoUrl = result.secure_url;
+    }
 
     const updatedContact = await Contacts.findOneAndUpdate(
       { _id: contactId, owner: user._id },
-      req.body,
+      {
+        ...req.body,
+        ...(photoUrl && { photo: photoUrl })
+      },
       { new: true, runValidators: true }
     );
 

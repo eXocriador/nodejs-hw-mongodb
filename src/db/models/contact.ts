@@ -17,7 +17,7 @@ const contactSchema = new Schema<IContact>(
       type: String,
       required: [true, 'Phone number is required'],
     },
-    favorite: {
+    isFavourite: {
       type: Boolean,
       default: false,
     },

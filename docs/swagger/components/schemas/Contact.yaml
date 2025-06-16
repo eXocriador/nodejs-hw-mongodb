@@ -18,7 +18,7 @@ properties:
   phoneNumber:
     type: string
     description: Номер телефону контакту
-  favorite:
+  isFavourite:
     type: boolean
     default: false
     description: Чи є контакт улюбленим
