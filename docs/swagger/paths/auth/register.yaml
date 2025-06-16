@@ -47,9 +47,17 @@ post:
         application/json:
           schema:
             $ref: '../../components/schemas/Error.yaml'
+          example:
+            status: 409
+            message: "Email already in use"
+            data: null
     '400':
       description: Невалідні дані
       content:
         application/json:
           schema:
             $ref: '../../components/schemas/Error.yaml'
+          example:
+            status: 400
+            message: "Field 'email' is required"
+            data: null

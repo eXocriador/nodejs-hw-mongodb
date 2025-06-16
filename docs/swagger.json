@@ -98,6 +98,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": 400,
+                  "message": "Field 'email' is required",
+                  "data": null
                 }
               }
             }
@@ -108,6 +113,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": 409,
+                  "message": "Email already in use",
+                  "data": null
                 }
               }
             }
