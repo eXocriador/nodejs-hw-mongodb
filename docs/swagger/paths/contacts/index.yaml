@@ -24,6 +24,12 @@ get:
         type: boolean
       description: Фільтр за улюбленими контактами (true/false)
     - in: query
+      name: contactType
+      schema:
+        type: string
+        enum: ['personal', 'work', 'other']
+      description: Фільтр за типом контакту
+    - in: query
       name: sortBy
       schema:
         type: string
@@ -100,6 +106,7 @@ post:
             - name
             - email
             - phoneNumber
+            - contactType
           properties:
             name:
               type: string
@@ -119,6 +126,10 @@ post:
               type: boolean
               default: false
               description: Чи є контакт улюбленим
+            contactType:
+              type: string
+              enum: ['personal', 'work', 'other']
+              description: Тип контакту
   responses:
     '201':
       description: Контакт створено

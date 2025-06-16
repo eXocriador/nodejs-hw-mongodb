@@ -4,6 +4,7 @@ required:
   - email
   - phoneNumber
   - owner
+  - contactType
 properties:
   _id:
     type: string
@@ -22,6 +23,13 @@ properties:
     type: boolean
     default: false
     description: Чи є контакт улюбленим
+  contactType:
+    type: string
+    enum: ['personal', 'work', 'other']
+    description: Тип контакту
+  photo:
+    type: string
+    description: URL фотографії контакту
   owner:
     type: string
     description: ID власника контакту
